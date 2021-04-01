@@ -1,11 +1,16 @@
 "use strict"
-const PORT = /*process.env.PORT || */3000;
+const PORT = process.env.PORT || 3000;
 const fs = require('fs');
 const express = require('express');
+const app = express();
+const server = app.listen(PORT);
+const socket = require('socket.io');
+const io = socket(server);
+
 const gameModule = require('./lib/game.js');
 
-const app = express(PORT);
-const server = app.listen();
+console.clear();
+console.log("running on port", PORT);
 
 app.get('/data', function(req, res) {
   if(game == null)
@@ -13,13 +18,8 @@ app.get('/data', function(req, res) {
   else
     res.send(game.getFullnessData());
 });
+
 app.use(express.static('public'));
-
-console.clear();
-console.log("running");
-
-const socket = require('socket.io');
-const io = socket(server);
 
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
