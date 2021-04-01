@@ -1,6 +1,5 @@
 "use strict"
-
-const PORT = process.env.PORT || 3000;
+const PORT = /*process.env.PORT || */3000;
 const fs = require('fs');
 const express = require('express');
 const gameModule = require('./lib/game.js');
