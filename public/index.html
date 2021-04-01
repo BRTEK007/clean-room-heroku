@@ -1,0 +1,105 @@
+﻿
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="theme.css">
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="pixi.min.js"></script>
+</head>
+
+<body>
+	<script src="script.js"></script>
+	<div id = "leaderboard">
+		<div class = "background"></div>
+		<div class = "entry" id = "entry_0"> <div class = "leftAlign">P0</div> <div class = "centerAlign">0-0</div> </div>
+		<div class = "entry" id = "entry_1"> <div class = "leftAlign">P1</div> <div class = "centerAlign">0-0</div> </div>
+		<div class = "entry" id = "entry_2"> <div class = "leftAlign">P2</div> <div class = "centerAlign">0-0</div> </div>
+		<div class = "entry" id = "entry_3"> <div class = "leftAlign">P3</div> <div class = "centerAlign">0-0</div> </div>
+	</div>
+
+	<!--<div id="codeDiv" style = "display:none">
+
+		<div class="digitDiv">
+			<div class="incrementDiv"></div>
+			<div class="numberDiv">0</div>
+			<div class="decrementDiv"></div>
+		</div>
+
+		<div class="digitDiv">
+			<div class="incrementDiv"></div>
+			<div class="numberDiv">0</div>
+			<div class="decrementDiv"></div>
+		</div>
+
+		<div class="digitDiv">
+			<div class="incrementDiv"></div>
+			<div class="numberDiv">0</div>
+			<div class="decrementDiv"></div>
+		</div>
+
+		<div class="digitDiv">
+			<div class="incrementDiv"></div>
+			<div class="numberDiv">0</div>
+			<div class="decrementDiv"></div>
+		</div>
+
+		<div id="confirmDiv">$</div>
+
+	</div>
+
+	<script>
+		const code = [0, 0, 0, 0];
+		let numberDivs = document.getElementsByClassName('numberDiv');
+		let incrementDivs = document.getElementsByClassName('incrementDiv');
+		let decrementDivs = document.getElementsByClassName('decrementDiv');
+		for (let i = 0; i < incrementDivs.length; i++) {
+			incrementDivs[i].addEventListener('click', () => {
+				code[i] += 1;
+				if (code[i] > 9) code[i] = 0;
+				numberDivs[i].innerHTML = code[i];
+			});
+			decrementDivs[i].addEventListener('click', () => {
+				code[i] -= 1;
+				if (code[i] < 0) code[i] = 9;
+				numberDivs[i].innerHTML = code[i];
+			})
+		}
+
+		let confirmDiv = document.getElementById('confirmDiv');
+		confirmDiv.addEventListener('click', () => {
+			let s = '' + code[0] + code[1] + code[2] + code[3];
+			attemptConnection(s);
+		});
+	</script>
+
+	<div id = "roomsHolderDiv">
+
+	<table class = "roomTable">
+		<tr>
+			<td>#1</td>
+			<td id = 'roomData1' >failed</td>
+			<td onclick = "roomJoin(1)">join</td>
+		</tr>
+	</table>
+
+	</div>
+
+	<script>
+		function httpGet(theUrl) {
+			var xmlHttp = new XMLHttpRequest();
+			xmlHttp.open("GET", theUrl, false);
+			xmlHttp.send(null);
+			return xmlHttp.responseText;
+		}
+		let data = httpGet('/data');
+		document.getElementById('roomData1').innerHTML = data;
+		function roomJoin(id){
+			console.log(id);
+		}
+	</script>-->
+
+</body>
+
+</html>
