@@ -140,7 +140,7 @@ const Game = {
       resolution: window.devicePixelRatio || 1,
     });
 
-    document.body.appendChild(this.app.view);
+    document.getElementById('gameDiv').appendChild(this.app.view);
 
     this.app.view.addEventListener('mousedown', () => {
       InputManager.mouseDownTrigger(true);
@@ -355,13 +355,11 @@ function encodeGameStateData(data){
   return encodedData;
 }
 
-attemptConnection('0000');
+//attemptConnection('0000');
 
-function attemptConnection(code) {
+function attemptConnection(data) {
   socket = io({
-    auth: {
-      token: code
-    }
+    auth: data
   });
 
   socket.on("connect_error", (err) => {

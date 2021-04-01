@@ -12,12 +12,33 @@ const gameModule = require('./lib/game.js');
 console.clear();
 console.log("running on port", PORT);
 
-app.get('/data', function(req, res) {
-  if(game == null)
-    res.send('0/4');
-  else
-    res.send(game.getFullnessData());
+app.get('/data', function (req, res) {
+  console.log('room data request');
+  if (game != null) {
+    const data = { rooms: [] };
+    data.rooms.push({ id: 1, fullness: game.getFullnessData() });
+    res.send(data);
+  }
 });
+
+/*app.post('/join', function (req, res) {
+  console.log('join request');
+  var body = '';
+
+  req.on('data', function (data) {
+    body += data;
+    if (body.length > 1e6) {
+      res.writeHead(413, {'Content-Type': 'text/plain'}).end();
+      req.socket.destroy();
+    }
+  });
+
+  req.on('end', function () {
+    console.log(JSON.parse(body));
+    return res.redirect('/game');
+  });
+
+});*/
 
 app.use(express.static('public'));
 
@@ -85,7 +106,7 @@ function gameLoop() {
     //console.log('update', delta);
   }
 
-  if(previousEmitTick + emitTickLengthMs <= now){
+  if (previousEmitTick + emitTickLengthMs <= now) {
     var delta = (now - previousEmitTick) / 1000;
     previousEmitTick = now;
     //console.log('emit', delta);
@@ -106,28 +127,28 @@ function gameLoop() {
   }*/
 }
 
-function formatGameStateEmitData(data){
+function formatGameStateEmitData(data) {
   const formattedData = {
-    d: 20-data.delta*1000,
+    d: 20 - data.delta * 1000,
     p: []
   };
   //players positions
-  for(let i = 0; i < data.players.length; i++){
+  for (let i = 0; i < data.players.length; i++) {
     let arr = [
       data.players[i].id,
       Math.round(data.players[i].x),
       Math.round(data.players[i].y),
-      Math.round(data.players[i].rotation*100)
+      Math.round(data.players[i].rotation * 100)
     ];
-    if(data.players[i].health != null){
+    if (data.players[i].health != null) {
       arr.push(data.players[i].health);
     }
     formattedData.p.push(arr);
   }
   //bullets to create
-  if(data.bullets != null){
+  if (data.bullets != null) {
     formattedData.b = [];
-    for(let i = 0; i < data.bullets.length; i++){
+    for (let i = 0; i < data.bullets.length; i++) {
       formattedData.b.push([
         Math.round(data.bullets[i].px),
         Math.round(data.bullets[i].py),
@@ -137,9 +158,9 @@ function formatGameStateEmitData(data){
     }
   }
   //
-  if(data.KD != null){
+  if (data.KD != null) {
     formattedData.s = [];
-    for(let i = 0; i < data.KD.length; i++){
+    for (let i = 0; i < data.KD.length; i++) {
       formattedData.s.push([
         data.KD[i].idK,
         data.KD[i].idD,
@@ -149,15 +170,15 @@ function formatGameStateEmitData(data){
   return formattedData;
 }
 
-function getUTF8Size( str ) {
+function getUTF8Size(str) {
   var sizeInBytes = str.split('')
-    .map(function( ch ) {
+    .map(function (ch) {
       return ch.charCodeAt(0);
-    }).map(function( uchar ) {
+    }).map(function (uchar) {
       // The reason for this is explained later in
       // the section “An Aside on Text Encodings”
       return uchar < 128 ? 1 : 2;
-    }).reduce(function( curr, next ) {
+    }).reduce(function (curr, next) {
       return curr + next;
     });
 
