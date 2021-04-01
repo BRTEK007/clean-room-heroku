@@ -1,6 +1,7 @@
+var PORT = process.env.PORT || 3000;
 var http = require('http');
 
 http.createServer(function (req, res) {
   res.write('Hello World!');
   res.end(); 
-}).listen(8080);
+}).listen(PORT);
