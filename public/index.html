@@ -10,6 +10,13 @@
 
 <body>
 	<div id = "gameDiv" style = "display:none;">
+
+	<div id = "performanceDiv">
+		<div class = "background"></div>
+		<div id = 'fpsDiv'>FPS: 60</div>
+		<div id = 'pingDiv'>ping: 20ms</div>
+	</div>
+
 	<script src="script.js"></script>
 	<div id = "leaderboard">
 		<div class = "background"></div>
@@ -22,9 +29,24 @@
 
 	<div id = "lobbyDiv" style = "display:block;">
 		<h1>pew pew</h1>
+		<canvas id = 'customizationCanvas'></canvas>
+		<input id = "colorInput" type = "color" value = "#ff00ff">
 		<input id = "nickInput" type = "text" placeholder = "your nick here">
 		<div id = "roomsHolderDiv"></div>
 		<script>
+			let customizationCanvas = document.getElementById('customizationCanvas');
+			customizationCanvas.width = 200;
+			customizationCanvas.height = 200;
+			let ctx = customizationCanvas.getContext('2d');
+			ctx.fillStyle = 'black';
+			ctx.fillRect(0,0,200,200);
+			ctx.fillStyle = '#dddddd';
+			ctx.fillRect(80,20,40,40);
+			ctx.fillStyle = 'red';
+			ctx.beginPath();
+			ctx.arc(100, 100, 50, 0, 2 * Math.PI);
+			ctx.fill();
+
 			requestServerData();
 
 			function requestServerData() {
@@ -61,12 +83,11 @@
 			}
 	
 			function requestRoomJoin(id){
-				document.getElementById('lobbyDiv').style.display = 'none';
-				document.getElementById('gameDiv').style.display = 'block';
-				const connectionData = {token : '0000', room : 1, nick : 'fartface'}
+				const connectionData = {token : '0000', room : id, nick : 'fartface'}
 				attemptConnection(connectionData);
 			}
 	
+			//requestRoomJoin(1);
 		</script>
 		</div>
 </body>

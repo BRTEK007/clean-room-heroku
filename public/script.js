@@ -6,6 +6,12 @@ const TEXTURES = {
 
 var socket;
 var t0, t1;
+var st0;
+
+const DOM = {
+  fpsDiv : document.getElementById('fpsDiv'),
+  pingDiv : document.getElementById('pingDiv')
+}
 
 const InputManager = {
   lastSentInput: {
@@ -355,8 +361,6 @@ function encodeGameStateData(data){
   return encodedData;
 }
 
-//attemptConnection('0000');
-
 function attemptConnection(data) {
   socket = io({
     auth: data
@@ -369,10 +373,11 @@ function attemptConnection(data) {
   socket.on("connect", () => {
     console.log('connected');
     try{
-    document.body.removeChild(document.getElementById('codeDiv'));
-  }catch{
+      document.getElementById('lobbyDiv').style.display = 'none';
+      document.getElementById('gameDiv').style.display = 'block';
+    }catch{
 
-  }
+    }
     connectedToServer();
   });
 }
@@ -387,13 +392,15 @@ function connectedToServer() {
     InputManager.keyReleased(e.code);
   });
 
-  socket.on('initGame', (data) => {Game.init(data);});
+  socket.on('initGame', (data) => {/*console.log('initialized: ', data);*/ Game.init(data);});
 
   socket.on('assignPlayer', (id) => {
+    //console.log('assigned', id);
     InputManager.assignPlayerId(id);
   });
 
   socket.on('createPlayer', (id, data) => {
+    //console.log('created player', id);
     Game.createPlayer(id, data);
   });
 
@@ -404,8 +411,10 @@ function connectedToServer() {
   socket.on('updateEntities', (data) => {
     //console.log(data);
     const encodedData = encodeGameStateData(data);
-    //console.log(encodedData);
+    //console.log(encodedData, Game.players);
     Game.updateServer(encodedData);
+    DOM.pingDiv.innerHTML = 'ping: ' + Math.round(performance.now() - st0) + 'ms';
+    st0 = performance.now();
   });
 
   t0 = performance.now();
@@ -426,6 +435,8 @@ function frame() {
 
     Game.update(delta);
   }
+
+  DOM.fpsDiv.innerHTML = 'FPS: ' + Math.round(1/delta);
 
   t1 = performance.now();
 }
