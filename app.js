@@ -23,6 +23,8 @@ class Room{
     this.game.update(delta);
     const emitDataBase = this.game.getEmitData();
     emitDataBase.delta = delta;
+    let ms = '' + Date.now();
+    emitDataBase.time = ms.substring(ms.length-3, ms.length);
 
     const emitData = this.formatGameStateEmitData(emitDataBase);
     io.to(this.name).emit('updateEntities', emitData);
@@ -35,6 +37,7 @@ class Room{
   formatGameStateEmitData(data) {
     const formattedData = {
       d: 20 - data.delta * 1000,
+      t: data.time,
       p: []
     };
     //players positions
@@ -77,6 +80,10 @@ class Room{
 
   joinRequest(socket){
     var freePlayerId = this.game.findFreePlayerId();
+    var playerData = {
+      nick: (socket.handshake.auth.nick == '' ? socket.id.substring(0, 5) : socket.handshake.auth.nick),
+      color: socket.handshake.auth.color
+    }
 
     if (freePlayerId == null) {
       socket.disconnect();
@@ -92,9 +99,14 @@ class Room{
 
     socket.emit('initGame', this.game.getInitData());
 
-    io.to(this.name).emit('createPlayer', freePlayerId, gameModule.player_template[freePlayerId]);
+    this.game.addPlayer(freePlayerId, socket.id, playerData);
 
-    this.game.addPlayer(freePlayerId, socket.id);
+    io.to(this.name).emit('createPlayer', freePlayerId,{
+       x : this.game.players[freePlayerId].pos.x, 
+       y : this.game.players[freePlayerId].pos.y, 
+       color: playerData.color, 
+       nick: playerData.nick
+    });
 
     socket.emit('assignPlayer', freePlayerId);
 
@@ -118,11 +130,11 @@ class Room{
 class RoomsManager{
   constructor(){
     let rawdata = fs.readFileSync('maps/map_0.json');
-    let obj = JSON.parse(rawdata);
+    let mapObj = JSON.parse(rawdata);
 
     this.rooms = new Array();
-    this.rooms.push(new Room(1, 'game1', new gameModule.Game(obj), 4, '0000'));
-    //this.rooms.push(new Room(2, 'game2', new gameModule.Game(obj), 4, '0000'));
+    this.rooms.push(new Room(1, 'game1', new gameModule.Game(mapObj), 4, '0000'));
+    //this.rooms.push(new Room(2, 'game2', new gameModule.Game(mapObj), 4, '0000'));
   }
 
   update(delta){

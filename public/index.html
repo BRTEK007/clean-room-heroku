@@ -9,39 +9,66 @@
 </head>
 
 <body>
-	<div id = "gameDiv" style = "display:none;">
+	<div id="gameDiv" style="display:none;">
 
-	<div id = "performanceDiv">
-		<div class = "background"></div>
-		<div id = 'fpsDiv'>FPS: 60</div>
-		<div id = 'pingDiv'>ping: 20ms</div>
+		<div id="performanceDiv">
+			<div class="background"></div>
+			<div id='fpsDiv'>FPS: 60</div>
+			<div id='fpsDiv2'>FPS: 60</div>
+			<div id='pingDiv'>ping: 20ms</div>
+		</div>
+
+		<script src="script.js"></script>
+		<div id="leaderboard">
+			<div class="background"></div>
+			<div class="entry" id="entry_0">
+				<div class="leftAlign">P0</div>
+				<div class="centerAlign">0-0</div>
+			</div>
+			<div class="entry" id="entry_1">
+				<div class="leftAlign">P1</div>
+				<div class="centerAlign">0-0</div>
+			</div>
+			<div class="entry" id="entry_2">
+				<div class="leftAlign">P2</div>
+				<div class="centerAlign">0-0</div>
+			</div>
+			<div class="entry" id="entry_3">
+				<div class="leftAlign">P3</div>
+				<div class="centerAlign">0-0</div>
+			</div>
+		</div>
 	</div>
 
-	<script src="script.js"></script>
-	<div id = "leaderboard">
-		<div class = "background"></div>
-		<div class = "entry" id = "entry_0"> <div class = "leftAlign">P0</div> <div class = "centerAlign">0-0</div> </div>
-		<div class = "entry" id = "entry_1"> <div class = "leftAlign">P1</div> <div class = "centerAlign">0-0</div> </div>
-		<div class = "entry" id = "entry_2"> <div class = "leftAlign">P2</div> <div class = "centerAlign">0-0</div> </div>
-		<div class = "entry" id = "entry_3"> <div class = "leftAlign">P3</div> <div class = "centerAlign">0-0</div> </div>
-	</div>
-	</div>
-
-	<div id = "lobbyDiv" style = "display:block;">
+	<div id="lobbyDiv" style="display:block;">
 		<h1>pew pew</h1>
-		<canvas id = 'customizationCanvas'></canvas>
-		<input id = "colorInput" type = "color" value = "#ff00ff">
-		<input id = "nickInput" type = "text" placeholder = "your nick here">
-		<div id = "roomsHolderDiv"></div>
+		<canvas id='customizationCanvas'></canvas>
+
+		<input id="colorInput" type="color" value = '#ff0000' list = 'presetColors' onchange="changePlayerColor(this.value)">
+		<datalist id="presetColors">
+			<option>#ff0000</option>
+			<option>#ff9900</option>
+			<option>#ffff00</option>
+			<option>#77ff00</option>
+			<option>#006600</option>
+			<option>#00ffff</option>
+			<option>#0000ff</option>
+			<option>#ff99ff</option>
+			<option>#ff00ff</option>
+			<option>#7700ff</option>
+		</datalist>
+
+		<input id="nickInput" type="text" placeholder="your nick here">
+		<div id="roomsHolderDiv"></div>
 		<script>
 			let customizationCanvas = document.getElementById('customizationCanvas');
 			customizationCanvas.width = 200;
 			customizationCanvas.height = 200;
 			let ctx = customizationCanvas.getContext('2d');
 			ctx.fillStyle = 'black';
-			ctx.fillRect(0,0,200,200);
+			ctx.fillRect(0, 0, 200, 200);
 			ctx.fillStyle = '#dddddd';
-			ctx.fillRect(80,20,40,40);
+			ctx.fillRect(80, 20, 40, 40);
 			ctx.fillStyle = 'red';
 			ctx.beginPath();
 			ctx.arc(100, 100, 50, 0, 2 * Math.PI);
@@ -53,43 +80,73 @@
 				let xhr = new XMLHttpRequest();
 				xhr.open('GET', '/data');
 				xhr.send();
-				xhr.onload = () => { if(xhr.status == 200) updatePage(JSON.parse(xhr.response)); };
+				xhr.onload = () => { if (xhr.status == 200) updatePage(JSON.parse(xhr.response)); };
 			}
-	
-			function updatePage(data){
+
+			function updatePage(data) {
 				const holder_div = document.getElementById('roomsHolderDiv');
-	
+
 				while (holder_div.firstChild) holder_div.removeChild(holder_div.firstChild);
-		
-				for(let i = 0; i < data.rooms.length; i++){
-	
+
+				for (let i = 0; i < data.rooms.length; i++) {
+
 					let main_div = document.createElement('div');
 					main_div.classList.add('roomDiv');
 					holder_div.appendChild(main_div);
-	
+
 					let id_div = document.createElement('div');
 					id_div.innerHTML = data.rooms[i].id;
 					main_div.appendChild(id_div);
-	
+
 					let fullness_div = document.createElement('div');
 					fullness_div.innerHTML = data.rooms[i].fullness;
 					main_div.appendChild(fullness_div);
-	
+
 					let join_button = document.createElement('button');
 					join_button.innerHTML = "JOIN";
-					join_button.onclick = () => {requestRoomJoin(data.rooms[i].id);};
+					join_button.onclick = () => { requestRoomJoin(data.rooms[i].id); };
 					main_div.appendChild(join_button);
 				}
 			}
-	
-			function requestRoomJoin(id){
-				const connectionData = {token : '0000', room : id, nick : 'fartface'}
+
+			function requestRoomJoin(id) {
+				let nick = document.getElementById('nickInput').value;
+				let color = convertColor(document.getElementById('colorInput').value);
+				const connectionData = { token: '0000', room: id, nick: nick, color: color };
+				//console.log(connectionData, document.getElementById('colorInput').value);
 				attemptConnection(connectionData);
 			}
-	
+
+			function convertColor(hexa) {
+				var chunks = [];
+				var tmp, i;
+				hexa = hexa.substr(1); // remove the pound 
+				if (hexa.length === 3) {
+					tmp = hexa.split("");
+					for (i = 0; i < 3; i++) {
+						chunks.push(parseInt(tmp[i] + "" + tmp[i], 16));
+					}
+				} else if (hexa.length === 6) {
+					tmp = hexa.match(/.{2}/g);
+					for (i = 0; i < 3; i++) {
+						chunks.push(parseInt(tmp[i], 16));
+					}
+				} else {
+					throw new Error("'" + hexa + "' is not a valid hex format");
+				}
+
+				return chunks[0] *256*256 + chunks[1] * 256 + chunks[2];
+			}
+
+			function changePlayerColor(color){
+				ctx.fillStyle = color;
+				ctx.beginPath();
+				ctx.arc(100, 100, 50, 0, 2 * Math.PI);
+				ctx.fill();
+			}
 			//requestRoomJoin(1);
 		</script>
-		</div>
+	</div>
 </body>
 
 </html>

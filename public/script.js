@@ -6,11 +6,11 @@ const TEXTURES = {
 
 var socket;
 var t0, t1;
-var st0;
 
 const DOM = {
   fpsDiv : document.getElementById('fpsDiv'),
-  pingDiv : document.getElementById('pingDiv')
+  pingDiv : document.getElementById('pingDiv'),
+  fpsDiv2 : document.getElementById('fpsDiv2')
 }
 
 const InputManager = {
@@ -139,17 +139,28 @@ const Game = {
 
     this.bullets = [];
 
+    let doc_w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    let doc_h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+    let canvasDimensions = CropDimensionsToRatio(doc_w*0.98, doc_h*0.98, this.map.ratio_w, this.map.ratio_h);
+
     this.app = new PIXI.Application({
       width: this.map.width,
       height: this.map.height,
       backgroundColor: 0x101010,
-      resolution: window.devicePixelRatio || 1,
+      resolution: canvasDimensions.x/this.map.width/*window.devicePixelRatio || 1*/,
     });
+
+    this.app.view.style.marginLeft = (doc_w - canvasDimensions.x)/2 + 'px';
+    this.app.view.style.marginTop = (doc_h - canvasDimensions.y)/2 + 'px';
 
     document.getElementById('gameDiv').appendChild(this.app.view);
 
     this.app.view.addEventListener('mousedown', () => {
       InputManager.mouseDownTrigger(true);
+    });
+
+    this.app.view.addEventListener('mouseleave', () => {
+      InputManager.mouseDownTrigger(false);
     });
 
     this.app.view.addEventListener('mouseup', () => {
@@ -160,7 +171,7 @@ const Game = {
 
     //add players
     for(let i = 0; i < data.players.length; i++){
-      this.createPlayer(data.players[i].id, data.players[i].template);
+      this.createPlayer(data.players[i].id, data.players[i]);
     }
 
     //add rects
@@ -318,6 +329,15 @@ const Game = {
   }
 }
 
+function CropDimensionsToRatio(ow, oh, rw, rh){
+  var sw = Math.floor(ow/rw);
+  var sh = Math.floor(oh/rh);
+  if(sw < sh){
+    return  {x : rw*sw, y : rh*sw};
+  }
+  return  {x : rw*sh, y : rh*sh};
+}
+
 function updateLeaderboard(){
   console.log(Game.playersKD);
 }
@@ -325,6 +345,7 @@ function updateLeaderboard(){
 function encodeGameStateData(data){
   const encodedData = {};
   encodedData.delta = (20-data.d)/1000;
+  encodedData.time = data.t;
   encodedData.players = [];
   for(let i = 0; i < data.p.length; i++){
     let obj = {
@@ -413,8 +434,13 @@ function connectedToServer() {
     const encodedData = encodeGameStateData(data);
     //console.log(encodedData, Game.players);
     Game.updateServer(encodedData);
-    DOM.pingDiv.innerHTML = 'ping: ' + Math.round(performance.now() - st0) + 'ms';
-    st0 = performance.now();
+
+    let ms = '' + Date.now();
+    let myTime = ms.substring(ms.length-3, ms.length);
+
+    DOM.pingDiv.innerHTML = 'ping: ' + ( parseInt(myTime) - parseInt(encodedData.time))+ 'ms';
+
+    DOM.fpsDiv2.innerHTML = 'FPS(s): ' + Math.round(1/encodedData.delta);
   });
 
   t0 = performance.now();
@@ -436,7 +462,7 @@ function frame() {
     Game.update(delta);
   }
 
-  DOM.fpsDiv.innerHTML = 'FPS: ' + Math.round(1/delta);
+  DOM.fpsDiv.innerHTML = 'FPS(c): ' + Math.round(1/delta);
 
   t1 = performance.now();
 }
@@ -444,7 +470,7 @@ function frame() {
 class Player {
   constructor(data, app) {
     this.pos = {
-      x: data.x,
+      x: data.x,//data.x, y
       y: data.y
     };
     this.rotation = 0;
@@ -481,6 +507,10 @@ class Player {
     this.health_bar.y = data.y;
     this.app.stage.addChild(this.health_bar);
     this.lastServerDelta;
+    //identification
+    this.id = data.id;
+    this.nick = new PIXI.Text(data.nick, {fontFamily : 'Arial', fontSize: 20, fill : 0xffffff, align : 'center'});
+    this.app.stage.addChild(this.nick);
   }
 
   updateHealth(h) {
@@ -499,11 +529,13 @@ class Player {
   respawn() {
     this.app.stage.addChild(this.graphic);
     this.app.stage.addChild(this.health_bar);
+    this.app.stage.addChild(this.nick);
   }
 
   destroy() {
     this.app.stage.removeChild(this.graphic);
     this.app.stage.removeChild(this.health_bar);
+    this.app.stage.removeChild(this.nick);
   }
 
   updateTransform(delta) {
@@ -518,6 +550,9 @@ class Player {
     this.health_bar.x = this.pos.x;
     this.health_bar.y = this.pos.y;
     this.health_bar.rotation = this.rotation;
+
+    this.nick.x = this.pos.x;
+    this.nick.y = this.pos.y - 60;
   }
 
   lerp(start, end, time){return start * (1-time) + end * time;}
@@ -537,6 +572,7 @@ class Player {
 
 
 }
+
 
 class Bullet {
   constructor(id, px, py, vx, vy, app) {
