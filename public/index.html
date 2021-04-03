@@ -6,6 +6,10 @@
 	<link rel="stylesheet" href="theme.css">
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="/scripts/pixi.min.js"></script>
+	<script src="/scripts/bullet.js"></script>
+	<script src="/scripts/player.js"></script>
+	<script src="/scripts/game.js"></script>
+	<script src="/scripts/input.js"></script>
 </head>
 
 <body>
@@ -17,28 +21,16 @@
 			<div id='fpsDiv2'>FPS: 60</div>
 			<div id='pingDiv'>ping: 20ms</div>
 		</div>
-		<script src="/scripts/main.js"></script>
-
 
 		<div id="leaderboard">
 			<div class="background"></div>
-			<div class="entry" id="entry_0">
-				<div class="leftAlign">P0</div>
-				<div class="centerAlign">0-0</div>
-			</div>
-			<div class="entry" id="entry_1">
-				<div class="leftAlign">P1</div>
-				<div class="centerAlign">0-0</div>
-			</div>
-			<div class="entry" id="entry_2">
-				<div class="leftAlign">P2</div>
-				<div class="centerAlign">0-0</div>
-			</div>
-			<div class="entry" id="entry_3">
-				<div class="leftAlign">P3</div>
-				<div class="centerAlign">0-0</div>
-			</div>
+			<!--<div class="entry" id="entry_0">
+				<div>P0</div>
+				<div>0-0</div>
+			</div>-->
 		</div>
+
+		<script src="/scripts/main.js"></script>
 	</div>
 
 	<div id="lobbyDiv" style="display:block;">

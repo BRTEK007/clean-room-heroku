@@ -74,21 +74,19 @@ body,html{
 	padding: 0;
 }
 
-#entry_0{color: red;}
-#entry_1{color: green;}
-
-.leftAlign{
+#leaderboard .entry div:nth-child(1){
 	display: inline-block;
 	width: 110px;
 	margin: 0;
 }
 
-.centerAlign{
+#leaderboard .entry div:nth-child(2){
 	display: inline-block;
 	text-align: center;
 	width: 60px;
 	margin: 0;
 }
+
 /*lobby*/
 #lobbyDiv{
 
