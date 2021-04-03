@@ -276,20 +276,12 @@ const Game = {
       }
       updateLeaderboard();
     }
-    //create bullets
-    for (let i = 0; i < data.bullets.length; i++) {
-        let id = data.bullets[i].id;
-        let x = data.bullets[i].px;
-        let y = data.bullets[i].py;
-        let vx = data.bullets[i].vx;
-        let vy = data.bullets[i].vy;
-        let newBullet = new Bullet(id, x, y, vx, vy, this.app);
-        this.bullets.push(newBullet);
-      }
-
     //update players server data
     for (let i = 0; i < data.players.length; i++) {
-      this.players[i].updateDesiredPos(data.players[i], data.delta);
+      this.players[i].updateServerPos(data.players[i], data.delta);
+      if(data.players[i].shot){
+        this.playerShot(this.players[i]);
+      }
       if (data.players[i].health != null) {
         this.players[i].updateHealth(data.players[i].health);
       }
@@ -297,6 +289,16 @@ const Game = {
 
 
 
+  },
+
+  playerShot(player){
+    let id = player.id;
+    let x = player.firePointPos.x;
+    let y = player.firePointPos.y;
+    let vx = 600 * Math.cos(player.serverTransform.rotation - Math.PI/2);
+    let vy = 600 * Math.sin(player.serverTransform.rotation - Math.PI/2);
+    let newBullet = new Bullet(id, x, y, vx, vy, this.app);
+    this.bullets.push(newBullet);
   },
 
   resolveBulletRectCollision(bullet, rect) {
@@ -339,47 +341,37 @@ function CropDimensionsToRatio(ow, oh, rw, rh){
 }
 
 function updateLeaderboard(){
-  console.log(Game.playersKD);
+  //console.log(Game.playersKD);
 }
 
-function encodeGameStateData(data){
-  const encodedData = {};
-  encodedData.delta = (20-data.d)/1000;
-  encodedData.time = data.t;
-  encodedData.players = [];
+function decodeGameStateData(data){
+  const decodedData = {};
+  decodedData.delta = (20-data.d)/1000;
+  decodedData.time = data.t;
+  decodedData.players = [];
   for(let i = 0; i < data.p.length; i++){
     let obj = {
       id : data.p[i][0],
       x : data.p[i][1],
       y : data.p[i][2],
-      rotation : data.p[i][3]/100
+      rotation : data.p[i][3]/100,
+      shot : (data.p[i][4] == 1 ? true : false)
     };
-    if(data.p[i][4] != null){
-      obj.health = data.p[i][4];
+    if(data.p[i][5] != null){
+      obj.health = data.p[i][5];
     }
-    encodedData.players.push(obj);
+    decodedData.players.push(obj);
   }
-  encodedData.bullets = [];
-  if(data.b != null){
-    for(let i = 0; i < data.b.length; i++){
-      encodedData.bullets.push({
-        px : data.b[i][0],
-        py : data.b[i][1],
-        vx : data.b[i][2],
-        vy : data.b[i][3],
-      });
-    }
-  }
-  encodedData.KD = [];
+  decodedData.KD = [];
   if(data.s != null){
     for(let i = 0; i < data.s.length; i++){
-      encodedData.KD.push({
+      decodedData.KD.push({
         idK : data.s[i][0],
         idD : data.s[i][1],
       });
     }
   }
-  return encodedData;
+  return decodedData;
 }
 
 function attemptConnection(data) {
@@ -431,16 +423,16 @@ function connectedToServer() {
 
   socket.on('updateEntities', (data) => {
     //console.log(data);
-    const encodedData = encodeGameStateData(data);
-    //console.log(encodedData, Game.players);
-    Game.updateServer(encodedData);
+    const decodedData = decodeGameStateData(data);
+    //console.log(decodedData, Game.players);
+    Game.updateServer(decodedData);
 
     let ms = '' + Date.now();
     let myTime = ms.substring(ms.length-3, ms.length);
 
-    DOM.pingDiv.innerHTML = 'ping: ' + ( parseInt(myTime) - parseInt(encodedData.time))+ 'ms';
+    DOM.pingDiv.innerHTML = 'ping: ' + ( parseInt(myTime) - parseInt(decodedData.time))+ 'ms';
 
-    DOM.fpsDiv2.innerHTML = 'FPS(s): ' + Math.round(1/encodedData.delta);
+    DOM.fpsDiv2.innerHTML = 'FPS(s): ' + Math.round(1/decodedData.delta);
   });
 
   t0 = performance.now();
@@ -511,6 +503,10 @@ class Player {
     this.id = data.id;
     this.nick = new PIXI.Text(data.nick, {fontFamily : 'Arial', fontSize: 20, fill : 0xffffff, align : 'center'});
     this.app.stage.addChild(this.nick);
+    //gun pos
+    this.firePointAngle = -Math.PI/2;
+    this.firePointMag = 50;
+    this.firePointPos = {x: 0, y: 0};
   }
 
   updateHealth(h) {
@@ -543,6 +539,7 @@ class Player {
     this.pos.y = this.lerp(this.pos.y, this.serverTransform.y, delta/this.serverTransform.delta);
     this.rotation = this.circularLerp(this.rotation, this.serverTransform.rotation, delta/this.serverTransform.delta);
 
+    //visuals
     this.graphic.x = this.pos.x;
     this.graphic.y = this.pos.y;
     this.graphic.rotation = this.rotation;
@@ -563,16 +560,18 @@ class Player {
     return start * (1-time) + end * time;
   }
 
-  updateDesiredPos(data, delta){
+  updateServerPos(data, delta){
     this.serverTransform.x = data.x;
     this.serverTransform.y = data.y;
     this.serverTransform.rotation = data.rotation;
     this.serverTransform.delta = delta;
+    //fire poiont
+    this.firePointPos.x = data.x + Math.cos(data.rotation + this.firePointAngle) * this.firePointMag;
+    this.firePointPos.y = data.y + Math.sin(data.rotation + this.firePointAngle) * this.firePointMag;
   }
 
 
 }
-
 
 class Bullet {
   constructor(id, px, py, vx, vy, app) {

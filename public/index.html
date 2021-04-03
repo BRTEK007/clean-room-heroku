@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" href="theme.css">
 	<script src="/socket.io/socket.io.js"></script>
-	<script src="pixi.min.js"></script>
+	<script src="/scripts/pixi.min.js"></script>
 </head>
 
 <body>
@@ -17,8 +17,9 @@
 			<div id='fpsDiv2'>FPS: 60</div>
 			<div id='pingDiv'>ping: 20ms</div>
 		</div>
+		<script src="/scripts/main.js"></script>
 
-		<script src="script.js"></script>
+
 		<div id="leaderboard">
 			<div class="background"></div>
 			<div class="entry" id="entry_0">
@@ -44,7 +45,7 @@
 		<h1>pew pew</h1>
 		<canvas id='customizationCanvas'></canvas>
 
-		<input id="colorInput" type="color" value = '#ff0000' list = 'presetColors' onchange="changePlayerColor(this.value)">
+		<input id="colorInput" type="color" list = 'presetColors' onchange="changePlayerColor(this.value)">
 		<datalist id="presetColors">
 			<option>#ff0000</option>
 			<option>#ff9900</option>
@@ -61,20 +62,21 @@
 		<input id="nickInput" type="text" placeholder="your nick here">
 		<div id="roomsHolderDiv"></div>
 		<script>
-			let customizationCanvas = document.getElementById('customizationCanvas');
+			const customizationCanvas = document.getElementById('customizationCanvas');
 			customizationCanvas.width = 200;
 			customizationCanvas.height = 200;
-			let ctx = customizationCanvas.getContext('2d');
+			const ctx = customizationCanvas.getContext('2d');
 			ctx.fillStyle = 'black';
 			ctx.fillRect(0, 0, 200, 200);
 			ctx.fillStyle = '#dddddd';
 			ctx.fillRect(80, 20, 40, 40);
-			ctx.fillStyle = 'red';
-			ctx.beginPath();
-			ctx.arc(100, 100, 50, 0, 2 * Math.PI);
-			ctx.fill();
 
-			requestServerData();
+			changePlayerColor('blue');
+
+			let color_list = document.getElementById('presetColors');
+			let color_input = document.getElementById('colorInput');
+			color_input.value = color_list.children[Math.floor(Math.random() * color_list.children.length)].innerHTML;
+			changePlayerColor(color_input.value);
 
 			function requestServerData() {
 				let xhr = new XMLHttpRequest();
@@ -144,6 +146,8 @@
 				ctx.arc(100, 100, 50, 0, 2 * Math.PI);
 				ctx.fill();
 			}
+
+			requestServerData();
 			//requestRoomJoin(1);
 		</script>
 	</div>

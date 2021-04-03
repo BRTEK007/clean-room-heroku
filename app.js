@@ -1,13 +1,17 @@
 "use strict"
 const PORT = process.env.PORT || 3000;
-const fs = require('fs');
 const express = require('express');
+const fs = require('fs');
 const app = express();
 const server = app.listen(PORT);
 const socket = require('socket.io');
 const io = socket(server);
 
 const gameModule = require('./lib/game.js');
+const formatModule = require('./lib/format.js');
+
+console.clear();
+console.log("running on port", PORT);
 
 class Room{
   constructor(id, name, game, maxPlayers, token){
@@ -26,56 +30,12 @@ class Room{
     let ms = '' + Date.now();
     emitDataBase.time = ms.substring(ms.length-3, ms.length);
 
-    const emitData = this.formatGameStateEmitData(emitDataBase);
+    const emitData = formatModule.encode(emitDataBase);
     io.to(this.name).emit('updateEntities', emitData);
   }
 
   getData(){
     return {id: this.id, fullness: this.game.getFullnessData()};
-  }
-
-  formatGameStateEmitData(data) {
-    const formattedData = {
-      d: 20 - data.delta * 1000,
-      t: data.time,
-      p: []
-    };
-    //players positions
-    for (let i = 0; i < data.players.length; i++) {
-      let arr = [
-        data.players[i].id,
-        Math.round(data.players[i].x),
-        Math.round(data.players[i].y),
-        Math.round(data.players[i].rotation * 100)
-      ];
-      if (data.players[i].health != null) {
-        arr.push(data.players[i].health);
-      }
-      formattedData.p.push(arr);
-    }
-    //bullets to create
-    if (data.bullets != null) {
-      formattedData.b = [];
-      for (let i = 0; i < data.bullets.length; i++) {
-        formattedData.b.push([
-          Math.round(data.bullets[i].px),
-          Math.round(data.bullets[i].py),
-          Math.round(data.bullets[i].vx),
-          Math.round(data.bullets[i].vy)
-        ]);
-      }
-    }
-    //
-    if (data.KD != null) {
-      formattedData.s = [];
-      for (let i = 0; i < data.KD.length; i++) {
-        formattedData.s.push([
-          data.KD[i].idK,
-          data.KD[i].idD,
-        ]);
-      }
-    }
-    return formattedData;
   }
 
   joinRequest(socket){
@@ -165,9 +125,6 @@ class RoomsManager{
 
 const roomsManger = new RoomsManager();
 
-console.clear();
-console.log("running on port", PORT);
-
 app.get('/data', function (req, res) {
   console.log('room data request');
   if (roomsManger != null) {
@@ -185,7 +142,6 @@ io.use((socket, next) => {
 io.sockets.on('connection', (socket) => {
   roomsManger.joinRequest(socket);
 });
-
 
 const tickLengthMs = 1000 / 60;
 var previousTick = Date.now();
