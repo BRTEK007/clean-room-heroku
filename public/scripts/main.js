@@ -42,14 +42,13 @@ function updateLeaderboard(data){
 }
 
 function addToLeaderBoard(id, data){
-  console.log(id, data);
   let leaderboard_entry = document.createElement('div');
   leaderboard_entry.classList.add('entry');
   //leaderboard_entry.setAttribute('playerId', id);
   leaderboard_entry.style.color = decToRGBColor(data.color);
   leaderboard_entry.innerHTML = `
   <div>${data.nick}</div>
-  <div>0:0</div>
+  <div>0</div>
   `;
   DOM.leaderboard.appendChild(leaderboard_entry);
 }

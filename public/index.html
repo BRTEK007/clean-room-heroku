@@ -13,7 +13,7 @@
 </head>
 
 <body>
-	<div id="gameDiv" style="display:none;">
+	<div id="gameDiv" hidden>
 
 		<div id="performanceDiv">
 			<div class="background"></div>
@@ -30,10 +30,17 @@
 			</div>-->
 		</div>
 
+		<div id = "gameStateDiv">
+			<div class="background"></div>
+			<div class = "stateMessageDiv">Waiting for players to join 1/2</div>
+			<div class = "stateMessageDiv" hidden>Winner : BRTEK007</div>
+			<div class = "stateMessageDiv" hidden>Game starts in 30s</div>
+		</div>
+
 		<script src="/scripts/main.js"></script>
 	</div>
 
-	<div id="lobbyDiv" style="display:block;">
+	<div id="lobbyDiv">
 		<h1>pew pew</h1>
 		<canvas id='customizationCanvas'></canvas>
 
@@ -136,6 +143,18 @@
 				ctx.fillStyle = color;
 				ctx.beginPath();
 				ctx.arc(100, 100, 50, 0, 2 * Math.PI);
+				ctx.fill();
+
+				ctx.fillStyle = 'white';
+				ctx.beginPath();
+				ctx.arc(80, 108, 16, 0, 2 * Math.PI);
+				ctx.arc(120, 108, 16, 0, 2 * Math.PI);
+				ctx.fill();
+
+				ctx.fillStyle = 'black';
+				ctx.beginPath();
+				ctx.arc(80, 108, 8, 0, 2 * Math.PI);
+				ctx.arc(120, 108, 8, 0, 2 * Math.PI);
 				ctx.fill();
 			}
 

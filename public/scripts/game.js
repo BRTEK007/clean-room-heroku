@@ -58,6 +58,14 @@ const Game = {
         this.addRect(lr.x, lr.y, lr.w, lr.h, lr.r);
         this.rects.push(lr);
       }
+
+      //add balls
+      this.balls = [];
+      for(let i = 0; i < data.map.balls.length; i++){
+        const lr = data.map.balls[i];
+        this.addBall(lr.x, lr.y, lr.r);
+        this.balls.push(lr);
+      }
   
     },
   
@@ -92,6 +100,18 @@ const Game = {
       //graphic.beginFill(0xFF00FF);
       graphic.drawRect(r,0,w-r*2,h);
       graphic.drawRect(0,r,w,h-r*2);
+      graphic.endFill();
+  
+      this.app.stage.addChild(graphic);
+    },
+
+    addBall: function(x,y,r){
+      const graphic = new PIXI.Graphics();
+
+      graphic.x = x;
+      graphic.y = y;
+      graphic.beginFill(0xEEEEEE);
+      graphic.drawCircle(0,0, r);
       graphic.endFill();
   
       this.app.stage.addChild(graphic);

@@ -24,6 +24,7 @@ class Room{
   }
 
   update(delta){
+    //dont update if no players
     this.game.update(delta);
     const emitDataBase = this.game.getEmitData();
     emitDataBase.delta = delta;

@@ -23,8 +23,16 @@ class Player {
       this.graphic.drawRect(-10, -40, 20, 25);
       this.graphic.endFill();
       //body
-      this.graphic.beginFill(data.color);//data.color
+      this.graphic.beginFill(data.color);
       this.graphic.drawCircle(0, 0, 25);
+      //eyes
+      this.graphic.beginFill(0xffffff);
+      this.graphic.drawCircle(-10, 4, 8);
+      this.graphic.drawCircle(10, 4, 8);
+      this.graphic.beginFill(0x000000);
+      this.graphic.drawCircle(-10, 4, 4);
+      this.graphic.drawCircle(10, 4, 4);
+      //
       this.graphic.endFill();
       this.graphic.x = data.x;
       this.graphic.y = data.y;
@@ -40,7 +48,8 @@ class Player {
       this.lastServerDelta;
       //identification
       this.id = data.id;
-      this.nick = new PIXI.Text(data.nick, {fontFamily : 'Arial', fontSize: 20, fill : 0xffffff, align : 'center'});
+      this.nick = new PIXI.Text(data.nick, {fontFamily : 'Arial', fontSize: 20, fill : data.color, align : 'center'});
+      this.nick.anchor.x = 0.5;
       this.app.stage.addChild(this.nick);
       //gun pos
       this.firePointAngle = -Math.PI/2;
