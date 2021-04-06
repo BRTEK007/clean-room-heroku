@@ -10,6 +10,9 @@ const io = socket(server);
 const gameModule = require('./lib/game.js');
 const formatModule = require('./lib/format.js');
 
+const tickLengthMs = 1000 / 30;
+var previousTick = Date.now();
+
 console.clear();
 console.log("running on port", PORT);
 
@@ -144,8 +147,6 @@ io.sockets.on('connection', (socket) => {
   roomsManger.joinRequest(socket);
 });
 
-const tickLengthMs = 1000 / 60;
-var previousTick = Date.now();
 
 function gameLoop() {
   var now = Date.now()
