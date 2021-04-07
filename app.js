@@ -63,7 +63,6 @@ class Room{
 
     socket.emit('initGame', this.game.getInitData());
 
-
     io.to(this.name).emit('createPlayer', newPlayer.id,{
        x : newPlayer.pos.x, 
        y : newPlayer.pos.y, 

@@ -73,31 +73,11 @@ const Game = {
       const graphic = new PIXI.Graphics();
       graphic.x = x;
       graphic.y = y;
-      //left bottom circle
       graphic.beginFill(0xEEEEEE);
       graphic.drawCircle(r, h-r, r);
-      //graphic.endFill();
-      //right bottom circle
-      //graphic.beginFill(0xFF00FF);
       graphic.drawCircle(w-r, h-r, r);
-      //graphic.endFill();
-      //left top circle
-      //graphic.beginFill(0xFF00FF);
       graphic.drawCircle(r, r, r);
-      //graphic.endFill();
-      //right top circle
-      //graphic.beginFill(0xFF00FF);
       graphic.drawCircle(w-r, r, r);
-      //graphic.endFill();
-      //line top
-      //graphic.lineStyle(1, 0xffffff).moveTo(r, 0).lineTo(w-r, 0);
-      //line bottom
-      //graphic.lineStyle(1, 0xffffff).moveTo(r,  h).lineTo(w-r, h);
-      //line left
-      //graphic.lineStyle(1, 0xffffff).moveTo(0, r).lineTo(0, h-r);
-      //line right
-      //graphic.lineStyle(1, 0xffffff).moveTo(w, r).lineTo( w, h-r);
-      //graphic.beginFill(0xFF00FF);
       graphic.drawRect(r,0,w-r*2,h);
       graphic.drawRect(0,r,w,h-r*2);
       graphic.endFill();
@@ -147,6 +127,10 @@ const Game = {
         //bullets level collisions
         for(let j = 0; j < this.rects.length; j++){
           this.resolveBulletRectCollision(this.bullets[i], this.rects[j]);
+          if(this.bullets[i].isDead) continue;
+        }
+        for(let j = 0; j < this.balls.length; j++){
+          this.resolveBulletBallCollision(this.bullets[i], this.balls[j]);
           if(this.bullets[i].isDead) continue;
         }
   
@@ -203,6 +187,12 @@ const Game = {
         bullet.pos.x - bullet.radius <= rect.x + rect.w &&
         bullet.pos.y + bullet.radius >= rect.y &&
         bullet.pos.y - bullet.radius <= rect.y + rect.h) {
+        bullet.isDead = true;
+      }
+    },
+
+    resolveBulletBallCollision(bullet, ball) {
+      if( Math.abs( Math.pow(bullet.pos.x - ball.x, 2) + Math.pow(bullet.pos.y - ball.y, 2) ) <= Math.pow(bullet.radius + ball.r, 2) ){
         bullet.isDead = true;
       }
     },

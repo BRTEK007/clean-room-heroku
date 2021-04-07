@@ -11,7 +11,8 @@ const DOM = {
   fpsDiv : document.getElementById('fpsDiv'),
   pingDiv : document.getElementById('pingDiv'),
   fpsDiv2 : document.getElementById('fpsDiv2'),
-  leaderboard : document.getElementById('leaderboard')
+  leaderboard : document.getElementById('leaderboard'),
+  l_entry : [null, null, null, null]
 }
 
 function decToRGBColor(dec){
@@ -41,16 +42,23 @@ function updateLeaderboard(data){
   console.log(data);
 }
 
-function addToLeaderBoard(id, data){
+function addToLeaderBoard(id, nick, color){
+  if(DOM.l_entry[id] != null) return;
   let leaderboard_entry = document.createElement('div');
   leaderboard_entry.classList.add('entry');
-  //leaderboard_entry.setAttribute('playerId', id);
-  leaderboard_entry.style.color = decToRGBColor(data.color);
+  leaderboard_entry.id = 'le' + id;
+  leaderboard_entry.style.color = decToRGBColor(color);
   leaderboard_entry.innerHTML = `
-  <div>${data.nick}</div>
-  <div>0</div>
+  <div>${nick}</div>
+  <div>${0}</div>
   `;
   DOM.leaderboard.appendChild(leaderboard_entry);
+  DOM.l_entry[id] = leaderboard_entry;
+}
+
+function removeFromLeaderBoard(id){
+  DOM.l_entry[id].remove();
+  DOM.l_entry[id] = null;
 }
 
 function decodeGameStateData(data){
@@ -93,7 +101,6 @@ function attemptConnection(data) {
   });
 
   socket.on("connect", () => {
-    console.log('connected');
     try{
       document.getElementById('lobbyDiv').style.display = 'none';
       document.getElementById('gameDiv').style.display = 'block';
@@ -114,7 +121,12 @@ function connectedToServer() {
     InputManager.keyReleased(e.code);
   });
 
-  socket.on('initGame', (data) => {/*console.log('initialized: ', data);*/ Game.init(data);});
+  socket.on('initGame', (data) => {
+   for(let i = 0; i < data.players.length; i++){
+     addToLeaderBoard(data.players[i].id, data.players[i].nick, data.players[i].color);
+   }
+   Game.init(data);
+  });
 
   socket.on('assignPlayer', (id) => {
     //console.log('assigned', id);
@@ -122,11 +134,12 @@ function connectedToServer() {
   });
 
   socket.on('createPlayer', (id, data) => {
-    addToLeaderBoard(id, data);
+    addToLeaderBoard(id, data.nick, data.color);
     Game.createPlayer(id, data);
   });
 
   socket.on('removePlayer', (id) => {
+    removeFromLeaderBoard(id);
     Game.removePlayer(id);
   });
 
