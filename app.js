@@ -17,11 +17,12 @@ console.clear();
 console.log("running on port", PORT);
 
 class Room{
-  constructor(id, name, game, maxPlayers, token){
+  constructor(id, name, game, maxPlayerCount, token){
     this.id = id;
     this.name = name;
     this.game = game;
-    this.maxPlayers = maxPlayers;
+    this.maxPlayerCount = maxPlayerCount;
+    this.playerCount = 0;
     this.token = token;
     this.sockets = [];
   }
@@ -39,53 +40,48 @@ class Room{
   }
 
   getData(){
-    return {id: this.id, fullness: this.game.getFullnessData()};
+    return {id: this.id, fullness: '' + this.playerCount + '/' + this.maxPlayerCount};
   }
 
   joinRequest(socket){
-    var freePlayerId = this.game.findFreePlayerId();
+    if(this.playerCount >= this.maxPlayerCount){
+      socket.disconnect();
+      return;
+    }
+    this.playerCount++;
+    
     var playerData = {
       nick: (socket.handshake.auth.nick == '' ? socket.id.substring(0, 5) : socket.handshake.auth.nick),
       color: socket.handshake.auth.color
     }
 
-    if (freePlayerId == null) {
-      socket.disconnect();
-      return;
-    }
+    let newPlayer = this.game.createNewPlayer(socket.id, playerData);
 
-    //this.sockets.push(socket);
-
-    //socket.join(this.name);
     socket.join(this.name);
 
-    console.log('new player: ', freePlayerId);
+    console.log('new player: ', newPlayer.id);
 
     socket.emit('initGame', this.game.getInitData());
 
-    this.game.addPlayer(freePlayerId, socket.id, playerData);
 
-    io.to(this.name).emit('createPlayer', freePlayerId,{
-       x : this.game.players[freePlayerId].pos.x, 
-       y : this.game.players[freePlayerId].pos.y, 
+    io.to(this.name).emit('createPlayer', newPlayer.id,{
+       x : newPlayer.pos.x, 
+       y : newPlayer.pos.y, 
        color: playerData.color, 
        nick: playerData.nick
     });
 
-    socket.emit('assignPlayer', freePlayerId);
+    socket.emit('assignPlayer', newPlayer.id);
 
     socket.on('playerInput', data => {
-      this.game.updateInput(data, socket.id);
+      newPlayer.OnSocketInput(data);
     });
 
-  socket.on('playerClicked', () => {
-    this.game.playerClicked(socket.id);
-  });
-
   socket.on('disconnect', () => {
-    io.to(this.name).emit('removePlayer', freePlayerId);
-    this.game.removePlayer(freePlayerId, socket.id);
-    console.log('lost player: ', freePlayerId);
+    this.playerCount--;
+    io.to(this.name).emit('removePlayer', newPlayer.id);
+    this.game.removePlayer(newPlayer.id, socket.id);
+    console.log('lost player: ', newPlayer.id);
   });
 
   }

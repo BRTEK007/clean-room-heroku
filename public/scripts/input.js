@@ -39,10 +39,14 @@ const InputManager = {
         inputEmpty = false;
       }
   
-      if (Math.sqrt(Math.pow(this.lastSentInput.mx - this.currentInput.mx, 2) + Math.pow(this.lastSentInput.my - this.currentInput.my, 2)) > 30 &&
-        this.currentInput.mx >= 0 && this.currentInput.mx <  Game.map.width && this.currentInput.my >= 0 && this.currentInput.my < Game.map.height) {
-        inputToSend.mousePos = this.currentInput.my * Game.map.width + this.currentInput.mx;
+      if (this.lastSentInput.mx != this.currentInput.mx) {
+        inputToSend.mx = this.currentInput.mx;
         this.lastSentInput.mx = this.currentInput.mx;
+        inputEmpty = false;
+      }
+
+      if (this.lastSentInput.my != this.currentInput.my) {
+        inputToSend.my = this.currentInput.my;
         this.lastSentInput.my = this.currentInput.my;
         inputEmpty = false;
       }

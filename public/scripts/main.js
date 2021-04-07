@@ -122,7 +122,6 @@ function connectedToServer() {
   });
 
   socket.on('createPlayer', (id, data) => {
-    //console.log('created player', id);
     addToLeaderBoard(id, data);
     Game.createPlayer(id, data);
   });

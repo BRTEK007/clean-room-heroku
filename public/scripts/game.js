@@ -156,6 +156,7 @@ const Game = {
     },
   
     createPlayer: function(id, data) {
+      if(this.players[id] != null) return;
       this.players[id] = new Player(data, this.app);
     },
   
