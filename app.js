@@ -55,7 +55,7 @@ class Room{
       color: socket.handshake.auth.color
     }
 
-    let newPlayer = this.game.createNewPlayer(socket.id, playerData);
+    let newPlayer = this.game.createNewPlayer(playerData);
 
     socket.join(this.name);
 
@@ -79,7 +79,7 @@ class Room{
   socket.on('disconnect', () => {
     this.playerCount--;
     io.to(this.name).emit('removePlayer', newPlayer.id);
-    this.game.removePlayer(newPlayer.id, socket.id);
+    this.game.removePlayer(newPlayer.id);
     console.log('lost player: ', newPlayer.id);
   });
 
