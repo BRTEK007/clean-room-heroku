@@ -10,7 +10,7 @@ const io = socket(server);
 const gameModule = require('./lib/game.js');
 const formatModule = require('./lib/format.js');
 
-const tickLengthMs = 1000 / 30;
+const tickLengthMs = 1000 / 60;
 var previousTick = Date.now();
 
 console.clear();
