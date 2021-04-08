@@ -1,9 +1,9 @@
 body,html{
 	overflow: hidden;
 	margin: 0;
-	/*background-color: white;*/
 	/*background-image: url('brick.png');*/
-	background-color: #160447;
+	/*background-color: #160447;*/
+	background-color: #101010;
 	background-size: 32px;
 	user-select: none;
 	font-family: consolas;
