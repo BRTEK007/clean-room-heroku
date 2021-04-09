@@ -93,20 +93,29 @@ function decodeGameStateData(data){
 
 function attemptConnection(data) {
   socket = io({
+    reconnection : false,
+    timeout: 2000,
     auth: data
+  });
+
+  socket.on('disconnect', () =>{
+    console.log('disconnected');
+    Game.terminate();
+    alert('Bro, you were disconnected from the server!');
+    document.getElementById('lobbyDiv').setAttribute('visible', "true");
+    document.getElementById('gameDiv').setAttribute('visible', "false");
   });
 
   socket.on("connect_error", (err) => {
     console.log(err.message);
+    socket.disconnect();
+    socket = null;
   });
 
   socket.on("connect", () => {
-    try{
-      document.getElementById('lobbyDiv').style.display = 'none';
-      document.getElementById('gameDiv').style.display = 'block';
-    }catch{
-
-    }
+    console.log('connected');
+    document.getElementById('lobbyDiv').setAttribute('visible', "false");
+    document.getElementById('gameDiv').setAttribute('visible', "true");
     connectedToServer();
   });
 }
@@ -170,6 +179,7 @@ function frame() {
 
   if (Game.initialized) {
     let inputData = InputManager.getInputData();
+
     if (inputData != null) {
       socket.emit('playerInput', inputData);
     }

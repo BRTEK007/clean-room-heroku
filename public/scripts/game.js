@@ -26,7 +26,7 @@ const Game = {
         backgroundColor: 0x101010,
         resolution: canvasDimensions.x/this.map.width/*window.devicePixelRatio || 1*/,
       });
-  
+
       this.app.view.style.marginLeft = (doc_w - canvasDimensions.x)/2 + 'px';
       this.app.view.style.marginTop = (doc_h - canvasDimensions.y)/2 + 'px';
   
@@ -67,6 +67,25 @@ const Game = {
         this.balls.push(lr);
       }
   
+    },
+
+    terminate : function(){
+      this.map = null;
+  
+      this.players = null;
+  
+      this.playersKD = null;
+  
+      this.bullets = null;
+
+      this.app.view.remove();
+
+      this.app = null;
+  
+      this.initialized = false;
+  
+      this.rects = null;
+      this.balls = null;
     },
   
     addRect: function(x,y,w,h,r){

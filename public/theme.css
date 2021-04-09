@@ -9,7 +9,7 @@ body,html{
 	font-family: consolas;
 	padding: 0;
 }
-[hidden] {
+[visible = "false"]{
 	display: none;
 }
 
