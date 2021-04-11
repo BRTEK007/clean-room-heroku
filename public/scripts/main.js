@@ -6,6 +6,7 @@ const TEXTURES = {
 
 var socket;
 var t0, t1;
+var resizeTimer;
 
 const DOM = {
   fpsDiv : document.getElementById('fpsDiv'),
@@ -100,10 +101,7 @@ function attemptConnection(data) {
 
   socket.on('disconnect', () =>{
     console.log('disconnected');
-    Game.terminate();
-    alert('Bro, you were disconnected from the server!');
-    document.getElementById('lobbyDiv').setAttribute('visible', "true");
-    document.getElementById('gameDiv').setAttribute('visible', "false");
+    transitionToLobby();
   });
 
   socket.on("connect_error", (err) => {
@@ -114,27 +112,62 @@ function attemptConnection(data) {
 
   socket.on("connect", () => {
     console.log('connected');
-    document.getElementById('lobbyDiv').setAttribute('visible', "false");
-    document.getElementById('gameDiv').setAttribute('visible', "true");
+    transitionToGame();
     connectedToServer();
   });
 }
 
+function transitionToGame(){
+  document.getElementById('lobbyDiv').setAttribute('visible', "false");
+  document.getElementById('gameDiv').setAttribute('visible', "true");
+  window.addEventListener('resize', windowResize);
+  window.addEventListener('keydown', windowKeyDown);
+  window.addEventListener('keyup', windowKeyUp);
+  t0 = performance.now();
+  t1 = performance.now();
+  window.requestAnimationFrame(frame);
+}
+
+function transitionToLobby(){
+    alert('Bro, you were disconnected from the server!');
+    location.reload();
+    return;
+    Game.terminate();
+    socket = null;
+    document.getElementById('lobbyDiv').setAttribute('visible', "true");
+    document.getElementById('gameDiv').setAttribute('visible', "false");
+    window.removeEventListener('resize', windowResize);
+    window.removeEventListener('keydown', windowKeyDown);
+    window.removeEventListener('keyup', windowKeyUp);
+}
+
+function windowResize(){
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{
+    console.log('resize');
+    Game.resizeRequest();
+  }, 500);
+}
+
+function windowKeyDown(e){
+  InputManager.keyPressed(e.code);
+}
+
+function windowKeyUp(e){
+  InputManager.keyReleased(e.code);
+}
+
 function connectedToServer() {
-
-  window.addEventListener('keydown', e => {
-    InputManager.keyPressed(e.code);
-  });
-
-  window.addEventListener('keyup', e => {
-    InputManager.keyReleased(e.code);
-  });
 
   socket.on('initGame', (data) => {
    for(let i = 0; i < data.players.length; i++){
      addToLeaderBoard(data.players[i].id, data.players[i].nick, data.players[i].color);
    }
    Game.init(data);
+  });
+
+  socket.on('message', (msg) => {
+    console.log(msg);
   });
 
   socket.on('assignPlayer', (id) => {
@@ -166,10 +199,6 @@ function connectedToServer() {
 
     DOM.fpsDiv2.innerHTML = 'FPS(s): ' + Math.round(1/decodedData.delta);
   });
-
-  t0 = performance.now();
-  t1 = performance.now();
-  window.requestAnimationFrame(frame);
 }
 
 function frame() {

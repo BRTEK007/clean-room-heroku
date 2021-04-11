@@ -20,15 +20,23 @@ const Game = {
       let doc_h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
       let canvasDimensions = CropDimensionsToRatio(doc_w*0.98, doc_h*0.98, this.map.ratio_w, this.map.ratio_h);
   
+      /*this.app = new PIXI.Application({
+        width: this.map.width,
+        height: this.map.height,
+        backgroundColor: 0x999999,
+        resolution: canvasDimensions.x / this.map.width
+      });
+      this.app.view.style.marginLeft = (doc_w - canvasDimensions.x)/2 + 'px';
+      this.app.view.style.marginTop = (doc_h - canvasDimensions.y)/2 + 'px';*/
+
       this.app = new PIXI.Application({
         width: this.map.width,
         height: this.map.height,
-        backgroundColor: 0x101010,
-        resolution: canvasDimensions.x/this.map.width/*window.devicePixelRatio || 1*/,
+        backgroundColor: 0x999999,
+        resolution: window.devicePixelRatio || 1,
       });
-
-      this.app.view.style.marginLeft = (doc_w - canvasDimensions.x)/2 + 'px';
-      this.app.view.style.marginTop = (doc_h - canvasDimensions.y)/2 + 'px';
+      this.app.view.style.width = doc_w + 'px';
+      this.app.view.style.height = doc_h + 'px';
   
       document.getElementById('gameDiv').appendChild(this.app.view);
   
@@ -69,6 +77,33 @@ const Game = {
   
     },
 
+    resizeRequest(){
+      if(!this.initialized) return;
+      let doc_w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+      let doc_h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+      let canvasDimensions = CropDimensionsToRatio(doc_w*0.98, doc_h*0.98, this.map.ratio_w, this.map.ratio_h);
+
+      console.log(this.app.view);
+      //this.app.view.width = '600';
+      //this.app.resolution = 2;
+      //this.app.stage.transform.scale.x = this.map.width/canvasDimensions.x;
+      //this.app.stage.transform.scale.y = this.map.height/canvasDimensions.y;
+
+
+      //this.app.view.style.width = canvasDimensions.x + 'px';
+      //this.app.view.style.height = canvasDimensions.y + 'px';
+      //this.app.view.width = canvasDimensions.x;
+      //this.app.view.height = canvasDimensions.y;
+
+      this.app.view.style.width = doc_w + 'px';
+      this.app.view.style.height = doc_h + 'px';
+      this.app.view.width = this.map.width;
+      this.app.view.height = this.map.height;
+
+      //this.app.view.style.marginLeft = (doc_w - canvasDimensions.x)/2 + 'px';
+      //this.app.view.style.marginTop = (doc_h - canvasDimensions.y)/2 + 'px';
+    },
+
     terminate : function(){
       this.map = null;
   
@@ -92,7 +127,7 @@ const Game = {
       const graphic = new PIXI.Graphics();
       graphic.x = x;
       graphic.y = y;
-      graphic.beginFill(0xEEEEEE);
+      graphic.beginFill(0x333333);
       graphic.drawCircle(r, h-r, r);
       graphic.drawCircle(w-r, h-r, r);
       graphic.drawCircle(r, r, r);
@@ -109,7 +144,7 @@ const Game = {
 
       graphic.x = x;
       graphic.y = y;
-      graphic.beginFill(0xEEEEEE);
+      graphic.beginFill(0x333333);
       graphic.drawCircle(0,0, r);
       graphic.endFill();
   
@@ -195,8 +230,8 @@ const Game = {
       let id = player.id;
       let x = player.firePointPos.x;
       let y = player.firePointPos.y;
-      let vx = 600 * Math.cos(player.serverTransform.rotation - Math.PI/2);
-      let vy = 600 * Math.sin(player.serverTransform.rotation - Math.PI/2);
+      let vx = 800 * Math.cos(player.serverTransform.rotation - Math.PI/2);
+      let vy = 800 * Math.sin(player.serverTransform.rotation - Math.PI/2);
       let newBullet = new Bullet(id, x, y, vx, vy, this.app);
       this.bullets.push(newBullet);
     },

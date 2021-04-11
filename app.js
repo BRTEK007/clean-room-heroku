@@ -57,6 +57,8 @@ class Room{
 
     let newPlayer = this.game.createNewPlayer(playerData);
 
+    socket.send({a : 10});
+
     socket.join(this.name);
 
     console.log('new player: ', newPlayer.id);

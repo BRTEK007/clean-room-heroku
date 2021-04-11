@@ -1,3 +1,13 @@
+function getOutlineColor(dec){
+  let b = (dec % 256);
+  dec = (dec-b)/256;
+  let g = (dec%256);
+  dec = (dec-g)/256;
+  let r = dec;
+  return Math.max(r-50, 0) * 256*256 + Math.max(g-50, 0)*256 + Math.max(b-50, 0);
+}
+
+
 class Player {
     constructor(data, app) {
       this.pos = {
@@ -18,34 +28,44 @@ class Player {
       //visuals
       this.app = app;
       this.graphic = new PIXI.Graphics();
+      let outlineColor = getOutlineColor(data.color);
       //gun
-      this.graphic.beginFill(0xDDDDDD);
-      this.graphic.drawRect(-10, -40, 20, 25);
+      this.graphic.beginFill(0x545454);
+      this.graphic.drawRect(-8, -60, 16, 40);
       this.graphic.endFill();
       //body
       this.graphic.beginFill(data.color);
       this.graphic.drawCircle(0, 0, 25);
-      //eyes
-      this.graphic.beginFill(0xffffff);
-      this.graphic.drawCircle(-10, 4, 8);
-      this.graphic.drawCircle(10, 4, 8);
-      this.graphic.beginFill(0x000000);
-      this.graphic.drawCircle(-10, 4, 4);
-      this.graphic.drawCircle(10, 4, 4);
-      //
+      this.graphic.lineStyle(4, outlineColor);  //(thickness, color)
+      this.graphic.drawCircle(0, 0, 24);   //(x,y,radius)
+      this.graphic.endFill(); 
+      //hand 1
+      this.graphic.beginFill(data.color);
+      this.graphic.drawCircle(2, -20, 8);
+      this.graphic.lineStyle(2, outlineColor);  //(thickness, color)
+      this.graphic.drawCircle(2, -20, 7);   //(x,y,radius)
       this.graphic.endFill();
+      //hand 2
+      this.graphic.beginFill(data.color);
+      this.graphic.drawCircle(8, -45, 8);
+      this.graphic.lineStyle(2, outlineColor);  //(thickness, color)
+      this.graphic.drawCircle(8, -45, 7);   //(x,y,radius)
+      this.graphic.endFill();  
+      //health bar holder
+      this.graphic.beginFill(0xFF0000);
+      this.graphic.drawRect(-20, 35, 40, 10);
+      this.graphic.endFill();
+      //this.graphic.scale.set(2);
       this.graphic.x = data.x;
       this.graphic.y = data.y;
       app.stage.addChild(this.graphic);
       //health_bar
-      this.health_bar = new PIXI.Sprite(TEXTURES.health_bar[0]);
-      this.health_bar.scale.set(3);
-      this.health_bar.anchor.x = 0.5;
-      this.health_bar.anchor.y = -1.5;
-      this.health_bar.x = data.x;
-      this.health_bar.y = data.y;
-      this.app.stage.addChild(this.health_bar);
-      this.lastServerDelta;
+      this.health_bar = new PIXI.Graphics();
+      this.health_bar.beginFill(0x00FF00);
+      this.health_bar.drawRect(-20, 35, 40, 10);
+      this.health_bar.endFill();
+      app.stage.addChild(this.health_bar);
+      //this.health_bar.width = 20;
       //identification
       this.id = data.id;
       this.nick = new PIXI.Text(data.nick, {fontFamily : 'Arial', fontSize: 20, fill : data.color, align : 'center'});
@@ -53,7 +73,7 @@ class Player {
       this.app.stage.addChild(this.nick);
       //gun pos
       this.firePointAngle = -Math.PI/2;
-      this.firePointMag = 50;
+      this.firePointMag = 65;
       this.firePointPos = {x: 0, y: 0};
     }
   
@@ -67,7 +87,8 @@ class Player {
         this.respawn();
       }
       this.health = h;
-      this.health_bar.texture = TEXTURES.health_bar[3 - this.health];
+      this.health_bar.scale.x = this.health/3;
+      //this.health_bar.texture = TEXTURES.health_bar[3 - this.health];
     }
   
     respawn() {
@@ -119,4 +140,4 @@ class Player {
     }
   
   
-  }
+}
