@@ -6,6 +6,11 @@ const app = express();
 const server = app.listen(PORT);
 const socket = require('socket.io');
 const io = socket(server);
+const os = require('os-utils');
+
+os.cpuUsage(function(v){
+	console.log( 'CPU Usage (%): ' + v );
+});
 
 const gameModule = require('./lib/game.js');
 const formatModule = require('./lib/format.js');
@@ -157,6 +162,7 @@ function gameLoop() {
   }
 
   setTimeout(gameLoop);
+  //setImmediate(gameLoop);
   /*if (Date.now() - previousTick < tickLengthMs - 16) {
     setTimeout(gameLoop);
   } else {

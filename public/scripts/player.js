@@ -38,7 +38,15 @@ class Player {
       this.graphic.drawCircle(0, 0, 25);
       this.graphic.lineStyle(4, outlineColor);  //(thickness, color)
       this.graphic.drawCircle(0, 0, 24);   //(x,y,radius)
-      this.graphic.endFill(); 
+      this.graphic.endFill();
+       //eyes
+      this.graphic.lineStyle(0, outlineColor);
+      this.graphic.beginFill(0xffffff);
+      this.graphic.drawCircle(-10, 4, 8);
+      this.graphic.drawCircle(10, 4, 8);
+      this.graphic.beginFill(0x000000);
+      this.graphic.drawCircle(-10, 4, 4);
+      this.graphic.drawCircle(10, 4, 4);
       //hand 1
       this.graphic.beginFill(data.color);
       this.graphic.drawCircle(2, -20, 8);
