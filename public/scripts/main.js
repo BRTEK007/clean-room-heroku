@@ -129,9 +129,9 @@ function transitionToGame(){
 }
 
 function transitionToLobby(){
-    alert('Bro, you were disconnected from the server!');
-    location.reload();
-    return;
+    //alert('Bro, you were disconnected from the server!');
+    //location.reload();
+    //return;
     Game.terminate();
     socket = null;
     document.getElementById('lobbyDiv').setAttribute('visible', "true");
