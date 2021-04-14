@@ -32,7 +32,7 @@ const Game = {
       this.app = new PIXI.Application({
         width: this.map.width,
         height: this.map.height,
-        backgroundColor: 0x999999,
+        backgroundColor: 0x000000,
         resolution: window.devicePixelRatio || 1,
       });
       this.app.view.style.width = doc_w + 'px';
@@ -58,14 +58,6 @@ const Game = {
       for(let i = 0; i < data.players.length; i++){
         this.createPlayer(data.players[i].id, data.players[i]);
       }
-  
-      //add rects
-      this.rects = [];
-      for(let i = 0; i < data.map.rects.length; i++){
-        const lr = data.map.rects[i];
-        this.addRect(lr.x, lr.y, lr.w, lr.h, lr.r);
-        this.rects.push(lr);
-      }
 
       //add balls
       this.balls = [];
@@ -73,6 +65,18 @@ const Game = {
         const lr = data.map.balls[i];
         this.addBall(lr.x, lr.y, lr.r);
         this.balls.push(lr);
+      }
+
+      //add vertex shapes
+      for(let i = 0; i < data.map.vertexShapes.length; i++){
+        let t = data.map.vertexShapes[i];
+        this.addVertexShape(t);
+      }
+
+      //add regular polygons
+      for(let i = 0; i < data.map.regularPolygons.length; i++){
+        let t = data.map.regularPolygons[i];
+        this.addRegularPolygon(t);
       }
   
     },
@@ -123,20 +127,41 @@ const Game = {
       this.balls = null;
     },
   
-    addRect: function(x,y,w,h,r){
+    addVertexShape: function(s){
       const graphic = new PIXI.Graphics();
-      graphic.x = x;
-      graphic.y = y;
-      graphic.beginFill(0x333333);
-      graphic.drawCircle(r, h-r, r);
-      graphic.drawCircle(w-r, h-r, r);
-      graphic.drawCircle(r, r, r);
-      graphic.drawCircle(w-r, r, r);
-      graphic.drawRect(r,0,w-r*2,h);
-      graphic.drawRect(0,r,w,h-r*2);
-      graphic.endFill();
-  
+
+      graphic.lineStyle(2, 0xFFFFFF);
+      graphic.moveTo(s[0][0], s[0][1]);
+
+      for(let j = 1; j < s.length; j++){
+        graphic.lineTo(s[j][0], s[j][1]);
+      }
+
       this.app.stage.addChild(graphic);
+    },
+
+    addRegularPolygon(_data){
+      const graphic = new PIXI.Graphics();
+      graphic.lineStyle(2, 0xFFFFFF);
+
+      var angle = 2*Math.PI/_data.verticies;
+      var rotation = 2*Math.PI*_data.rotation/360;
+
+      var sx = _data.x + Math.round(Math.cos(rotation)*_data.radius);
+      var sy = _data.y + Math.round(Math.sin(rotation)*_data.radius);
+
+      graphic.moveTo(sx, sy);
+
+      for(let i = 1; i < _data.verticies; i++){
+        let x = _data.x + Math.round(Math.cos(rotation + angle*i)*_data.radius);
+        let y = _data.y + Math.round(Math.sin(rotation + angle*i)*_data.radius);
+        graphic.lineTo(x, y);
+      }
+
+      graphic.lineTo(sx, sy);
+
+      this.app.stage.addChild(graphic);
+
     },
 
     addBall: function(x,y,r){
@@ -144,9 +169,8 @@ const Game = {
 
       graphic.x = x;
       graphic.y = y;
-      graphic.beginFill(0x333333);
+      graphic.lineStyle(2, 0xFFFFFF);
       graphic.drawCircle(0,0, r);
-      graphic.endFill();
   
       this.app.stage.addChild(graphic);
     },
@@ -179,10 +203,6 @@ const Game = {
         }
   
         //bullets level collisions
-        for(let j = 0; j < this.rects.length; j++){
-          this.resolveBulletRectCollision(this.bullets[i], this.rects[j]);
-          if(this.bullets[i].isDead) continue;
-        }
         for(let j = 0; j < this.balls.length; j++){
           this.resolveBulletBallCollision(this.bullets[i], this.balls[j]);
           if(this.bullets[i].isDead) continue;
@@ -271,3 +291,4 @@ const Game = {
       return Math.abs((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) <= (r1 + r2) * (r1 + r2);
     }
 }
+
