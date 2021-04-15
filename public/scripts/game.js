@@ -37,6 +37,8 @@ const Game = {
       });
       this.app.view.style.width = doc_w + 'px';
       this.app.view.style.height = doc_h + 'px';
+
+      this.camera = new Camera(this.map.width, this.map.height);
   
       document.getElementById('gameDiv').appendChild(this.app.view);
   
@@ -59,6 +61,8 @@ const Game = {
         this.createPlayer(data.players[i].id, data.players[i]);
       }
 
+
+      this.worldContainer = new PIXI.Container();
       //add balls
       this.balls = [];
       for(let i = 0; i < data.map.balls.length; i++){
@@ -79,6 +83,7 @@ const Game = {
         this.addRegularPolygon(t);
       }
   
+      this.app.stage.addChild(this.worldContainer);
     },
 
     resizeRequest(){
@@ -137,7 +142,8 @@ const Game = {
         graphic.lineTo(s[j][0], s[j][1]);
       }
 
-      this.app.stage.addChild(graphic);
+      //this.app.stage.addChild(graphic);
+      this.worldContainer.addChild(graphic);
     },
 
     addRegularPolygon(_data){
@@ -160,8 +166,8 @@ const Game = {
 
       graphic.lineTo(sx, sy);
 
-      this.app.stage.addChild(graphic);
-
+      //this.app.stage.addChild(graphic);
+      this.worldContainer.addChild(graphic);
     },
 
     addBall: function(x,y,r){
@@ -172,7 +178,8 @@ const Game = {
       graphic.lineStyle(2, 0xFFFFFF);
       graphic.drawCircle(0,0, r);
   
-      this.app.stage.addChild(graphic);
+      //this.app.stage.addChild(graphic);
+      this.worldContainer.addChild(graphic);
     },
   
     update: function(delta) {
@@ -210,7 +217,18 @@ const Game = {
   
       }
   
-  
+      //render
+      this.camera.pos.x = this.players[InputManager.playerId].pos.x;
+      this.camera.pos.y = this.players[InputManager.playerId].pos.y;
+      let playerScreenPos = this.camera.worldToScreenPosition(this.players[InputManager.playerId].pos);
+      this.players[InputManager.playerId].updateScreenPos(playerScreenPos);
+      let worldScreenPos = this.camera.worldToScreenPosition({x : 0, y : 0});
+      this.worldContainer.transform.position.x = worldScreenPos.x;
+      this.worldContainer.transform.position.y = worldScreenPos.y;
+      //console.log(this.camera.pos);
+      //this.worldContainer.transform.position.x+=0.1;
+      //this.app.stage.children[0].transform.position.x = 300;
+      //console.log(this.app.stage.children);
     },
   
     createPlayer: function(id, data) {
@@ -292,3 +310,13 @@ const Game = {
     }
 }
 
+class Camera{
+  constructor(_width, _height){
+    this.pos = {x : 300, y : 300};
+    this.size = {x : _width, y : _height};
+  }
+  worldToScreenPosition(_pos){
+    let cornerPos = {x : this.pos.x-this.size.x/2, y : this.pos.y-this.size.y/2};
+    return {x : _pos.x - cornerPos.x, y : _pos.y - cornerPos.y};
+  }
+}

@@ -116,8 +116,10 @@ class Player {
       this.pos.y = this.lerp(this.pos.y, this.serverTransform.y, delta/this.serverTransform.delta);
       this.rotation = this.circularLerp(this.rotation, this.serverTransform.rotation, delta/this.serverTransform.delta);
   
+      this.graphic.rotation = this.rotation;
+      this.health_bar.rotation = this.rotation;
       //visuals
-      this.graphic.x = this.pos.x;
+      /*this.graphic.x = this.pos.x;
       this.graphic.y = this.pos.y;
       this.graphic.rotation = this.rotation;
   
@@ -126,7 +128,7 @@ class Player {
       this.health_bar.rotation = this.rotation;
   
       this.nick.x = this.pos.x;
-      this.nick.y = this.pos.y - 60;
+      this.nick.y = this.pos.y - 60;*/
     }
   
     lerp(start, end, time){return start * (1-time) + end * time;}
@@ -147,5 +149,14 @@ class Player {
       this.firePointPos.y = data.y + Math.sin(data.rotation + this.firePointAngle) * this.firePointMag;
     }
   
+    updateScreenPos(_pos){
+      this.graphic.x = _pos.x;
+      this.graphic.y = _pos.y;
   
+      this.health_bar.x = _pos.x;
+      this.health_bar.y = _pos.y;
+  
+      this.nick.x = _pos.x;
+      this.nick.y = _pos.y - 60;
+    }
 }
