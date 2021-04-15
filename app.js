@@ -12,7 +12,7 @@ os.cpuUsage(function(v){
 	console.log( 'CPU Usage (%): ' + v );
 });
 
-const gameModule = require('./lib/game.js');
+const Game = require('./lib/game.js');
 const formatModule = require('./lib/format.js');
 
 const tickLengthMs = 1000 / 60;
@@ -99,7 +99,7 @@ class RoomsManager{
     let mapObj = JSON.parse(rawdata);
 
     this.rooms = new Array();
-    this.rooms.push(new Room(1, 'game1', new gameModule.Game(mapObj), 4, '0000'));
+    this.rooms.push(new Room(1, 'game1', new Game(mapObj), 4, '0000'));
     //this.rooms.push(new Room(2, 'game2', new gameModule.Game(mapObj), 4, '0000'));
   }
 
