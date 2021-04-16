@@ -3,26 +3,24 @@ const InputManager = {
       x: 0,
       y: 0,
       rotation: 0,
-      mx: 0,
-      my: 0,
       mouseDown: false
     },
     currentInput: {
       x: 0,
       y: 0,
-      mx: 0,
-      my: 0,
       rotation: 0,
       mouseDown: false
     },
-    playerId: null,
   
     getInputData: function() {
-      if (this.playerId == null || Game.players[this.playerId].dead) return null;
+      if (Game.clientPlayer == null || Game.clientPlayer.dead) return null;
   
       let mousePos = Game.app.renderer.plugins.interaction.mouse.global;
-      this.currentInput.mx = Math.round(mousePos.x);
-      this.currentInput.my = Math.round(mousePos.y);
+
+      var dist_Y = Game.clientPlayer.graphic.transform.position.y - mousePos.y;
+      var dist_X = Game.clientPlayer.graphic.transform.position.x - mousePos.x;
+      var angle = Math.atan2(dist_Y, dist_X) - Math.PI / 2;
+      this.currentInput.rotation = Math.round(angle*100)/100;
   
       let inputToSend = {};
       let inputEmpty = true;
@@ -39,15 +37,9 @@ const InputManager = {
         inputEmpty = false;
       }
   
-      if (this.lastSentInput.mx != this.currentInput.mx) {
-        inputToSend.mx = this.currentInput.mx;
-        this.lastSentInput.mx = this.currentInput.mx;
-        inputEmpty = false;
-      }
-
-      if (this.lastSentInput.my != this.currentInput.my) {
-        inputToSend.my = this.currentInput.my;
-        this.lastSentInput.my = this.currentInput.my;
+      if (this.lastSentInput.rotation != this.currentInput.rotation) {
+        inputToSend.rotation = this.currentInput.rotation;
+        this.lastSentInput.rotation = this.currentInput.rotation;
         inputEmpty = false;
       }
   
@@ -61,9 +53,6 @@ const InputManager = {
   
     },
   
-    assignPlayerId: function(id) {
-      this.playerId = id;
-    },
   
     keyPressed: function(key) {
       switch (key) {

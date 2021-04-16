@@ -172,7 +172,7 @@ function connectedToServer() {
 
   socket.on('assignPlayer', (id) => {
     //console.log('assigned', id);
-    InputManager.assignPlayerId(id);
+    Game.assignPlayerById(id);
   });
 
   socket.on('createPlayer', (id, data) => {

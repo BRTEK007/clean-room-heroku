@@ -6,6 +6,7 @@ const Game = {
       this.map = data.map;
   
       this.players = [null, null, null, null];
+      this.clientPlayer = null;
   
       this.playersKD = [
         {kills : 0, deaths: 0},
@@ -25,8 +26,6 @@ const Game = {
         backgroundColor: 0x000000,
         resolution: window.devicePixelRatio || 1,
       });
-
-      this.camera = new Camera(doc_w, doc_h);
   
       document.getElementById('gameDiv').appendChild(this.app.view);
   
@@ -48,6 +47,8 @@ const Game = {
       for(let i = 0; i < data.players.length; i++){
         this.createPlayer(data.players[i].id, data.players[i]);
       }
+
+      this.camera = new Camera(doc_w, doc_h);
 
       //add balls
       this.balls = [];
@@ -154,7 +155,6 @@ const Game = {
     },
   
     update: function(delta) {
-  
       //update players
       for (let i = 0; i < this.players.length; i++) {
         if(this.players[i] != null && !this.players[i].isDead)
@@ -172,8 +172,6 @@ const Game = {
   
         this.bullets[i].update(delta);
   
-        if (this.isBulletOut(this.bullets[i])) {this.bullets[i].isDead = true; continue;}
-  
         //bullets player collision
         for (let j = 0; j < this.players.length; j++) {
           if (this.players[j] == null || this.bullets[i].id == j || this.players[j].dead) continue;
@@ -189,8 +187,7 @@ const Game = {
       }
   
       //render
-      this.camera.pos.x = this.players[InputManager.playerId].pos.x;
-      this.camera.pos.y = this.players[InputManager.playerId].pos.y;
+      this.camera.update(delta);
       for(let i = 0; i < this.app.stage.children.length; i++){
         var child = this.app.stage.children[i];
         if(child.worldPos != null){
@@ -199,6 +196,7 @@ const Game = {
           child.transform.position.y = screenPos.y;
         }
       }
+      
     },
   
     createPlayer: function(id, data) {
@@ -209,6 +207,11 @@ const Game = {
     removePlayer: function(id) {
       this.players[id].destroy();
       this.players[id] = null;
+    },
+
+    assignPlayerById(_id){
+      this.clientPlayer = this.players[_id];
+      this.camera.setTarget(this.clientPlayer);
     },
   
     updateServer: function(data) {
@@ -259,13 +262,6 @@ const Game = {
       }
     },
   
-    isBulletOut: function(bullet) {
-      return bullet.pos.x - bullet.radius < 0 ||
-        bullet.pos.x + bullet.radius >= this.map.width ||
-        bullet.pos.y - bullet.radius < 0 ||
-        bullet.pos.y + bullet.radius >= this.map.height;
-    },
-  
     doesBulletPlayerOverlap: function(bullet, player) {
       let x1 = bullet.pos.x;
       let y1 = bullet.pos.y;
@@ -284,6 +280,11 @@ class Camera{
   constructor(_width, _height){
     this.pos = {x : 300, y : 300};
     this.size = {x : _width, y : _height};
+    this.target = null;
+    this.speed = Infinity;
+  }
+  setTarget(_t){
+    this.target = _t;
   }
   worldToScreenPosition(_pos){
     let cornerPos = {x : this.pos.x-this.size.x/2, y : this.pos.y-this.size.y/2};
@@ -293,4 +294,10 @@ class Camera{
     this.size.x = _w;
     this.size.y = _h;
   }
+  update(_delta){
+    if(this.target == null) return;
+    this.pos.x = this.lerp(this.pos.x, this.target.pos.x, _delta*this.speed);
+    this.pos.y = this.lerp(this.pos.y, this.target.pos.y, _delta*this.speed);
+  }
+  lerp(start, end, time){time = Math.min(time, 1); return start * (1-time) + end * time;}
 }
