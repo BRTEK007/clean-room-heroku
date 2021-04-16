@@ -18,27 +18,15 @@ const Game = {
   
       let doc_w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
       let doc_h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-      let canvasDimensions = CropDimensionsToRatio(doc_w*0.98, doc_h*0.98, this.map.ratio_w, this.map.ratio_h);
-  
-      /*this.app = new PIXI.Application({
-        width: this.map.width,
-        height: this.map.height,
-        backgroundColor: 0x999999,
-        resolution: canvasDimensions.x / this.map.width
-      });
-      this.app.view.style.marginLeft = (doc_w - canvasDimensions.x)/2 + 'px';
-      this.app.view.style.marginTop = (doc_h - canvasDimensions.y)/2 + 'px';*/
 
       this.app = new PIXI.Application({
-        width: this.map.width,
-        height: this.map.height,
+        width: doc_w,
+        height: doc_h,
         backgroundColor: 0x000000,
         resolution: window.devicePixelRatio || 1,
       });
-      this.app.view.style.width = doc_w + 'px';
-      this.app.view.style.height = doc_h + 'px';
 
-      this.camera = new Camera(this.map.width, this.map.height);
+      this.camera = new Camera(doc_w, doc_h);
   
       document.getElementById('gameDiv').appendChild(this.app.view);
   
@@ -61,8 +49,6 @@ const Game = {
         this.createPlayer(data.players[i].id, data.players[i]);
       }
 
-
-      this.worldContainer = new PIXI.Container();
       //add balls
       this.balls = [];
       for(let i = 0; i < data.map.balls.length; i++){
@@ -83,34 +69,19 @@ const Game = {
         this.addRegularPolygon(t);
       }
   
-      this.app.stage.addChild(this.worldContainer);
     },
 
     resizeRequest(){
       if(!this.initialized) return;
       let doc_w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
       let doc_h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-      let canvasDimensions = CropDimensionsToRatio(doc_w*0.98, doc_h*0.98, this.map.ratio_w, this.map.ratio_h);
-
-      console.log(this.app.view);
-      //this.app.view.width = '600';
-      //this.app.resolution = 2;
-      //this.app.stage.transform.scale.x = this.map.width/canvasDimensions.x;
-      //this.app.stage.transform.scale.y = this.map.height/canvasDimensions.y;
-
-
-      //this.app.view.style.width = canvasDimensions.x + 'px';
-      //this.app.view.style.height = canvasDimensions.y + 'px';
-      //this.app.view.width = canvasDimensions.x;
-      //this.app.view.height = canvasDimensions.y;
 
       this.app.view.style.width = doc_w + 'px';
       this.app.view.style.height = doc_h + 'px';
-      this.app.view.width = this.map.width;
-      this.app.view.height = this.map.height;
+      this.app.view.width = doc_w
+      this.app.view.height = doc_h;
 
-      //this.app.view.style.marginLeft = (doc_w - canvasDimensions.x)/2 + 'px';
-      //this.app.view.style.marginTop = (doc_h - canvasDimensions.y)/2 + 'px';
+      this.camera.resize(doc_w, doc_h);
     },
 
     terminate : function(){
@@ -133,7 +104,7 @@ const Game = {
     },
   
     addVertexShape: function(s){
-      const graphic = new PIXI.Graphics();
+      var graphic = new PIXI.Graphics();
 
       graphic.lineStyle(2, 0xFFFFFF);
       graphic.moveTo(s[0][0], s[0][1]);
@@ -142,12 +113,12 @@ const Game = {
         graphic.lineTo(s[j][0], s[j][1]);
       }
 
-      //this.app.stage.addChild(graphic);
-      this.worldContainer.addChild(graphic);
+      Object.assign(graphic, {worldPos : {x : 0, y : 0}} );
+      this.app.stage.addChild(graphic);
     },
 
     addRegularPolygon(_data){
-      const graphic = new PIXI.Graphics();
+      var graphic = new PIXI.Graphics();
       graphic.lineStyle(2, 0xFFFFFF);
 
       var angle = 2*Math.PI/_data.verticies;
@@ -166,20 +137,20 @@ const Game = {
 
       graphic.lineTo(sx, sy);
 
-      //this.app.stage.addChild(graphic);
-      this.worldContainer.addChild(graphic);
+      Object.assign(graphic, {worldPos : {x : 0, y : 0}} );
+      this.app.stage.addChild(graphic);
     },
 
     addBall: function(x,y,r){
-      const graphic = new PIXI.Graphics();
+      var graphic = new PIXI.Graphics();
 
       graphic.x = x;
       graphic.y = y;
       graphic.lineStyle(2, 0xFFFFFF);
       graphic.drawCircle(0,0, r);
   
-      //this.app.stage.addChild(graphic);
-      this.worldContainer.addChild(graphic);
+      Object.assign(graphic, {worldPos : {x : x, y : y}} );
+      this.app.stage.addChild(graphic);
     },
   
     update: function(delta) {
@@ -220,15 +191,14 @@ const Game = {
       //render
       this.camera.pos.x = this.players[InputManager.playerId].pos.x;
       this.camera.pos.y = this.players[InputManager.playerId].pos.y;
-      let playerScreenPos = this.camera.worldToScreenPosition(this.players[InputManager.playerId].pos);
-      this.players[InputManager.playerId].updateScreenPos(playerScreenPos);
-      let worldScreenPos = this.camera.worldToScreenPosition({x : 0, y : 0});
-      this.worldContainer.transform.position.x = worldScreenPos.x;
-      this.worldContainer.transform.position.y = worldScreenPos.y;
-      //console.log(this.camera.pos);
-      //this.worldContainer.transform.position.x+=0.1;
-      //this.app.stage.children[0].transform.position.x = 300;
-      //console.log(this.app.stage.children);
+      for(let i = 0; i < this.app.stage.children.length; i++){
+        var child = this.app.stage.children[i];
+        if(child.worldPos != null){
+          let screenPos = this.camera.worldToScreenPosition(child.worldPos);
+          child.transform.position.x = screenPos.x;
+          child.transform.position.y = screenPos.y;
+        }
+      }
     },
   
     createPlayer: function(id, data) {
@@ -318,5 +288,9 @@ class Camera{
   worldToScreenPosition(_pos){
     let cornerPos = {x : this.pos.x-this.size.x/2, y : this.pos.y-this.size.y/2};
     return {x : _pos.x - cornerPos.x, y : _pos.y - cornerPos.y};
+  }
+  resize(_w, _h){
+    this.size.x = _w;
+    this.size.y = _h;
   }
 }

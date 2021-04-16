@@ -16,16 +16,15 @@ class Bullet {
       this.graphic.beginFill(0xFFFF00);
       this.graphic.drawCircle(0, 0, 10);
       this.graphic.endFill();
-      this.graphic.x = px;
-      this.graphic.y = py;
+      Object.assign(this.graphic, {worldPos : {x : px, y : py}} );
       app.stage.addChild(this.graphic);
     }
   
     update(delta) {
       this.pos.x += this.vel.x * delta;
       this.pos.y += this.vel.y * delta;
-      this.graphic.x = this.pos.x;
-      this.graphic.y = this.pos.y;
+      this.graphic.worldPos.x = this.pos.x;
+      this.graphic.worldPos.y = this.pos.y;
     }
   
     destroy(app) {
