@@ -233,8 +233,6 @@ const Game = {
         }
       }
   
-  
-  
     },
   
     playerShot(player){

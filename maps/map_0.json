@@ -9,7 +9,7 @@
    ],
    "regularPolygons" : [
      {"x" : 500, "y" : 500, "radius" : 100, "verticies": 3, "rotation" : -90},
-    {"x" : 1500, "y" : 500, "radius" : 100, "verticies": 6, "rotation" : 0}
+     {"x" : 1500, "y" : 500, "radius" : 100, "verticies": 6, "rotation" : 0}
    ],
    "spawn_points":[
      {"x" : 100, "y" : 100},
