@@ -5,7 +5,7 @@ const Game = {
     init: function(data) {
       this.map = data.map;
   
-      this.players = [null, null, null, null];
+      this.players = new Array(data.playerCount).fill(null);
       this.clientPlayer = null;
   
       this.playersKD = [

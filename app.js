@@ -22,13 +22,13 @@ console.clear();
 console.log("running on port", PORT);
 
 class Room{
-  constructor(id, name, game, maxPlayerCount, token){
-    this.id = id;
-    this.name = name;
-    this.game = game;
-    this.maxPlayerCount = maxPlayerCount;
+  constructor(_id, _name, _maxPlayerCount, _token, _mapObj){
+    this.id = _id;
+    this.name = _name;
+    this.game = new Game(_mapObj, _maxPlayerCount);
+    this.maxPlayerCount = _maxPlayerCount;
     this.playerCount = 0;
-    this.token = token;
+    this.token = _token;
     this.sockets = [];
   }
 
@@ -99,7 +99,7 @@ class RoomsManager{
     let mapObj = JSON.parse(rawdata);
 
     this.rooms = new Array();
-    this.rooms.push(new Room(1, 'game1', new Game(mapObj), 4, '0000'));
+    this.rooms.push(new Room(1, 'game1', 10, '0000', mapObj));
     //this.rooms.push(new Room(2, 'game2', new gameModule.Game(mapObj), 4, '0000'));
   }
 
