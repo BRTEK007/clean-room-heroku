@@ -17,7 +17,8 @@ class Bullet {
       this.graphic.drawCircle(0, 0, 10);
       this.graphic.endFill();
       Object.assign(this.graphic, {worldPos : {x : px, y : py}} );
-      app.stage.addChild(this.graphic);
+      this.app = app;
+      this.app.stage.addChild(this.graphic);
     }
   
     update(delta) {
@@ -27,7 +28,7 @@ class Bullet {
       this.graphic.worldPos.y = this.pos.y;
     }
   
-    destroy(app) {
-      app.stage.removeChild(this.graphic);
+    destroy() {
+      this.app.stage.removeChild(this.graphic);
     }
   }

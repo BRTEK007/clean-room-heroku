@@ -8,13 +8,6 @@ const Game = {
       this.players = new Array(data.playerCount).fill(null);
       this.clientPlayer = null;
   
-      this.playersKD = [
-        {kills : 0, deaths: 0},
-        {kills : 0, deaths: 0},
-        {kills : 0, deaths: 0},
-        {kills : 0, deaths: 0}
-      ];
-  
       this.bullets = [];
   
       let doc_w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -50,29 +43,31 @@ const Game = {
 
       this.camera = new Camera(doc_w, doc_h);
 
+
+      this.solidColliders = [];
       //add balls
-      this.balls = [];
-      for(let i = 0; i < data.map.balls.length; i++){
+      /*for(let i = 0; i < data.map.balls.length; i++){
         const lr = data.map.balls[i];
         this.addBall(lr.x, lr.y, lr.r);
-        this.balls.push(lr);
-      }
+      }*/
 
       //add vertex shapes
       for(let i = 0; i < data.map.vertexShapes.length; i++){
         let t = data.map.vertexShapes[i];
-        this.addVertexShape(t);
+        let col = createVertexShapeCollider(t, this.app);
+        this.solidColliders.push(col);
       }
 
       //add regular polygons
-      for(let i = 0; i < data.map.regularPolygons.length; i++){
+      /*for(let i = 0; i < data.map.regularPolygons.length; i++){
         let t = data.map.regularPolygons[i];
         this.addRegularPolygon(t);
-      }
+      }*/
   
     },
 
     resizeRequest(){
+      return;
       if(!this.initialized) return;
       let doc_w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
       let doc_h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
@@ -90,8 +85,6 @@ const Game = {
   
       this.players = null;
   
-      this.playersKD = null;
-  
       this.bullets = null;
 
       this.app.view.remove();
@@ -99,23 +92,6 @@ const Game = {
       this.app = null;
   
       this.initialized = false;
-  
-      this.rects = null;
-      this.balls = null;
-    },
-  
-    addVertexShape: function(s){
-      var graphic = new PIXI.Graphics();
-
-      graphic.lineStyle(2, 0xFFFFFF);
-      graphic.moveTo(s[0][0], s[0][1]);
-
-      for(let j = 1; j < s.length; j++){
-        graphic.lineTo(s[j][0], s[j][1]);
-      }
-
-      Object.assign(graphic, {worldPos : {x : 0, y : 0}} );
-      this.app.stage.addChild(graphic);
     },
 
     addRegularPolygon(_data){
@@ -155,6 +131,8 @@ const Game = {
     },
   
     update: function(delta) {
+      //console.clear();
+      console.log(this.bullets.length);
       //update players
       for (let i = 0; i < this.players.length; i++) {
         if(this.players[i] != null && !this.players[i].isDead)
@@ -162,10 +140,11 @@ const Game = {
       }
   
       //update bullets
+      loop1:
       for (let i = 0; i < this.bullets.length; i++) {
         //remove dead bullets
         if (this.bullets[i].isDead) {
-          this.bullets[i].destroy(this.app);
+          this.bullets[i].destroy();
           this.bullets.splice(i, 1);
           continue;
         }
@@ -179,9 +158,18 @@ const Game = {
         }
   
         //bullets level collisions
-        for(let j = 0; j < this.balls.length; j++){
-          this.resolveBulletBallCollision(this.bullets[i], this.balls[j]);
-          if(this.bullets[i].isDead) continue;
+        for(let j = 0; j < this.solidColliders.length; j++){
+          let sCol = this.solidColliders[j];
+          if(sCol instanceof SolidPolygonCollider){
+            for(let i = 0; i < sCol.walls.length; i++){
+              if(CollisionDetection.cirlce2solidWall(sCol, sCol.walls[i])){
+                this.bullets[i].isDead = true;
+                continue loop1;
+              }
+                
+            }
+          }
+
         }
   
       }
@@ -215,13 +203,6 @@ const Game = {
     },
   
     updateServer: function(data) {
-      //kill and deaths
-      if(data.KD != null){
-        for(let i = 0; i < data.KD.length; i++){
-          this.playersKD[data.KD[i].idK].kills++;
-          this.playersKD[data.KD[i].idD].deaths++;
-        }
-      }
       //update players server data
       for (let i = 0; i < data.players.length; i++) {
         this.players[i].updateServerPos(data.players[i], data.delta);
