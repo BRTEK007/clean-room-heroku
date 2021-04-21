@@ -1,7 +1,7 @@
 "use strict"
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 const TEXTURES = {
-  health_bar: [PIXI.Texture.from('health_bar_3.png'), PIXI.Texture.from('health_bar_2.png'), PIXI.Texture.from('health_bar_1.png')]
+  car: [PIXI.Texture.from('car.png')]
 };
 
 var socket;

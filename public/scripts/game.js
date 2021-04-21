@@ -158,7 +158,7 @@ const Game = {
         }
   
         //bullets level collisions
-        for(let j = 0; j < this.solidColliders.length; j++){
+       /* for(let j = 0; j < this.solidColliders.length; j++){
           let sCol = this.solidColliders[j];
           if(sCol instanceof SolidPolygonCollider){
             for(let i = 0; i < sCol.walls.length; i++){
@@ -170,7 +170,7 @@ const Game = {
             }
           }
 
-        }
+        }*/
   
       }
   
