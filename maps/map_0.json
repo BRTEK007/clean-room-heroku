@@ -2,14 +2,17 @@
    "ratio_w" : 2,
    "ratio_h" : 1,
    "vertexShapes" : [
-    [ [0,0], [3000, 0], [3000, 2000], [0, 2000], [0,0]]
+    
    ],
    "balls" : [
-    {"x" : 1000, "y" : 500, "r" : 100}
+    {"x" : 0, "y" : 0, "r" : 300}
    ],
    "regularPolygons" : [
-     {"x" : 500, "y" : 500, "radius" : 100, "verticies": 3, "rotation" : -90},
-     {"x" : 1500, "y" : 500, "radius" : 100, "verticies": 6, "rotation" : 0}
+     {"x" : 0, "y" : 0, "radius" : 2000, "verticies": 6, "rotation" : 0},
+     {"x" : 1000, "y" : 0, "radius" : 100, "verticies": 4, "rotation" : 0},
+     {"x" : -1000, "y" : 0, "radius" : 100, "verticies": 4, "rotation" : 0},
+     {"x" : 0, "y" : -1000, "radius" : 100, "verticies": 4, "rotation" : 45},
+     {"x" : 0, "y" : 1000, "radius" : 100, "verticies": 4, "rotation" : 45}
    ],
    "spawn_points":[
      {"x" : 100, "y" : 100},

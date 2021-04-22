@@ -2,25 +2,16 @@ const InputManager = {
     lastSentInput: {
       x: 0,
       y: 0,
-      rotation: 0,
-      mouseDown: false
+      action: false
     },
     currentInput: {
       x: 0,
       y: 0,
-      rotation: 0,
-      mouseDown: false
+      action: false
     },
   
     getInputData: function() {
       if (Game.clientPlayer == null || Game.clientPlayer.dead) return null;
-  
-      let mousePos = Game.app.renderer.plugins.interaction.mouse.global;
-
-      var dist_Y = Game.clientPlayer.graphic.transform.position.y - mousePos.y;
-      var dist_X = Game.clientPlayer.graphic.transform.position.x - mousePos.x;
-      var angle = Math.atan2(dist_Y, dist_X) - Math.PI / 2;
-      this.currentInput.rotation = Math.round(angle*100)/100;
   
       let inputToSend = {};
       let inputEmpty = true;
@@ -37,15 +28,9 @@ const InputManager = {
         inputEmpty = false;
       }
   
-      if (this.lastSentInput.rotation != this.currentInput.rotation) {
-        inputToSend.rotation = this.currentInput.rotation;
-        this.lastSentInput.rotation = this.currentInput.rotation;
-        inputEmpty = false;
-      }
-  
-      if (this.lastSentInput.mouseDown != this.currentInput.mouseDown) {
-        inputToSend.mouseDown = this.currentInput.mouseDown;
-        this.lastSentInput.mouseDown = this.currentInput.mouseDown;
+      if (this.lastSentInput.action != this.currentInput.action) {
+        inputToSend.action = this.currentInput.action;
+        this.lastSentInput.action = this.currentInput.action;
         inputEmpty = false;
       }
   
@@ -56,6 +41,7 @@ const InputManager = {
   
     keyPressed: function(key) {
       switch (key) {
+        
         case 'ArrowRight':
         case 'KeyD':
           this.currentInput.x = 1;
@@ -71,6 +57,9 @@ const InputManager = {
         case 'ArrowDown':
         case 'KeyS':
           this.currentInput.y = 1;
+          break;
+         case 'Space':
+            this.currentInput.action = true;
           break;
   
       }
@@ -90,11 +79,10 @@ const InputManager = {
         case 'ArrowDown': case 'KeyS':
           this.currentInput.y = 0;
           break;
+        case 'Space':
+            this.currentInput.action = false;
+          break;
       }
     },
-  
-    mouseDownTrigger: function(m) {
-      this.currentInput.mouseDown = m;
-    }
   
   }

@@ -1,6 +1,5 @@
 class Bullet {
-    constructor(id, px, py, vx, vy, app) {
-      this.id = id;
+    constructor(px, py, vx, vy, _color ,app) {
       this.pos = {
         x: px,
         y: py
@@ -13,7 +12,7 @@ class Bullet {
       this.idDead = false;
   
       this.graphic = new PIXI.Graphics();
-      this.graphic.beginFill(0xFFFF00);
+      this.graphic.beginFill(_color);
       this.graphic.drawCircle(0, 0, 10);
       this.graphic.endFill();
       Object.assign(this.graphic, {worldPos : {x : px, y : py}} );

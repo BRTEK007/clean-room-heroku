@@ -22,18 +22,6 @@ const Game = {
   
       document.getElementById('gameDiv').appendChild(this.app.view);
   
-      this.app.view.addEventListener('mousedown', () => {
-        InputManager.mouseDownTrigger(true);
-      });
-  
-      this.app.view.addEventListener('mouseleave', () => {
-        InputManager.mouseDownTrigger(false);
-      });
-  
-      this.app.view.addEventListener('mouseup', () => {
-        InputManager.mouseDownTrigger(false);
-      });
-  
       this.initialized = true;
   
       //add players
@@ -45,24 +33,18 @@ const Game = {
 
 
       this.solidColliders = [];
-      //add balls
-      /*for(let i = 0; i < data.map.balls.length; i++){
-        const lr = data.map.balls[i];
-        this.addBall(lr.x, lr.y, lr.r);
-      }*/
-
+      //add circles
+      for(let i = 0; i < data.map.balls.length; i++)
+        this.solidColliders.push(new SolidCircleCollider(data.map.balls[i], this.app));
+      
       //add vertex shapes
-      for(let i = 0; i < data.map.vertexShapes.length; i++){
-        let t = data.map.vertexShapes[i];
-        let col = createVertexShapeCollider(t, this.app);
-        this.solidColliders.push(col);
-      }
-
+      for(let i = 0; i < data.map.vertexShapes.length; i++)
+        this.solidColliders.push(createVertexShapeCollider(data.map.vertexShapes[i], this.app));
+      
       //add regular polygons
-      /*for(let i = 0; i < data.map.regularPolygons.length; i++){
-        let t = data.map.regularPolygons[i];
-        this.addRegularPolygon(t);
-      }*/
+      for(let i = 0; i < data.map.regularPolygons.length; i++)
+        this.solidColliders.push(createRegularPolygon(data.map.regularPolygons[i], this.app));
+      
   
     },
 
@@ -93,46 +75,10 @@ const Game = {
   
       this.initialized = false;
     },
-
-    addRegularPolygon(_data){
-      var graphic = new PIXI.Graphics();
-      graphic.lineStyle(2, 0xFFFFFF);
-
-      var angle = 2*Math.PI/_data.verticies;
-      var rotation = 2*Math.PI*_data.rotation/360;
-
-      var sx = _data.x + Math.round(Math.cos(rotation)*_data.radius);
-      var sy = _data.y + Math.round(Math.sin(rotation)*_data.radius);
-
-      graphic.moveTo(sx, sy);
-
-      for(let i = 1; i < _data.verticies; i++){
-        let x = _data.x + Math.round(Math.cos(rotation + angle*i)*_data.radius);
-        let y = _data.y + Math.round(Math.sin(rotation + angle*i)*_data.radius);
-        graphic.lineTo(x, y);
-      }
-
-      graphic.lineTo(sx, sy);
-
-      Object.assign(graphic, {worldPos : {x : 0, y : 0}} );
-      this.app.stage.addChild(graphic);
-    },
-
-    addBall: function(x,y,r){
-      var graphic = new PIXI.Graphics();
-
-      graphic.x = x;
-      graphic.y = y;
-      graphic.lineStyle(2, 0xFFFFFF);
-      graphic.drawCircle(0,0, r);
-  
-      Object.assign(graphic, {worldPos : {x : x, y : y}} );
-      this.app.stage.addChild(graphic);
-    },
   
     update: function(delta) {
       //console.clear();
-      console.log(this.bullets.length);
+      //console.log(this.bullets.length);
       //update players
       for (let i = 0; i < this.players.length; i++) {
         if(this.players[i] != null && !this.players[i].isDead)
@@ -158,7 +104,7 @@ const Game = {
         }
   
         //bullets level collisions
-        for(let j = 0; j < this.solidColliders.length; j++){
+        /*for(let j = 0; j < this.solidColliders.length; j++){
           let sCol = this.solidColliders[j];
           if(sCol instanceof SolidPolygonCollider){
             for(let i = 0; i < sCol.walls.length; i++){
@@ -170,11 +116,12 @@ const Game = {
             }
           }
 
-        }
+        }*/
   
       }
   
       //render
+      if(!this.camera) return;
       this.camera.update(delta);
       for(let i = 0; i < this.app.stage.children.length; i++){
         var child = this.app.stage.children[i];
@@ -217,12 +164,11 @@ const Game = {
     },
   
     playerShot(player){
-      let id = player.id;
       let x = player.firePointPos.x;
       let y = player.firePointPos.y;
-      let vx = 800 * Math.cos(player.serverTransform.rotation - Math.PI/2);
-      let vy = 800 * Math.sin(player.serverTransform.rotation - Math.PI/2);
-      let newBullet = new Bullet(id, x, y, vx, vy, this.app);
+      let vx = 800 * Math.cos(player.serverTransform.rotation);
+      let vy = 800 * Math.sin(player.serverTransform.rotation);
+      let newBullet = new Bullet(x, y, vx, vy,player.color, this.app);
       this.bullets.push(newBullet);
     },
   

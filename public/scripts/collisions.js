@@ -48,27 +48,55 @@ class SolidWallCollider extends SolidCollider{
 class SolidPolygonCollider extends SolidCollider{
     constructor(_app){
       super();
-      this.app = _app;
       this.walls = [];
       this.graphic = new PIXI.Graphics();
       this.graphic.lineStyle(2, 0xFFFFFF);
       Object.assign(this.graphic, {worldPos : {x : 0, y : 0}} );
+      _app.stage.addChild(this.graphic);
     }
     addWall(x1, y1, x2, y2){
+      this.graphic.moveTo(x1, y1);
+      this.graphic.lineTo(x2, y2);
       this.walls.push(new SolidWallCollider(x1, y1, x2, y2));
+    }
+}
+
+class SolidCircleCollider extends SolidCollider{
+    constructor(_d, _app) {
+      super();
+      this.pos = new Vector2D(_d.x, _d.y);
+      this.radius = _d.r;
+
+      this.graphic = new PIXI.Graphics();
+      this.graphic.x = _d.x;
+      this.graphic.y = _d.y;
+      this.graphic.lineStyle(2, 0xFFFFFF);
+      this.graphic.drawCircle(0,0, _d.r);
+      Object.assign(this.graphic, {worldPos : {x : _d.x, y : _d.y}} );
+      _app.stage.addChild(this.graphic);
     }
 }
 
 function createVertexShapeCollider(s, app){
     var polygon = new SolidPolygonCollider(app);
 
-    polygon.graphic.moveTo(s[0][0], s[0][1]);
-
-    for(let j = 1; j < s.length; j++){
+    for(let j = 1; j < s.length; j++)
       polygon.addWall(s[j-1][0], s[j-1][1], s[j][0], s[j][1]);
-      polygon.graphic.lineTo(s[j][0], s[j][1]);
-    }
-
-    app.stage.addChild(polygon.graphic);
+    
     return polygon;
+}
+
+function createRegularPolygon(_data, _app){
+    var polygon = new SolidPolygonCollider(_app);
+  
+    var angle = 2*Math.PI/_data.verticies;
+    var rotation = 2*Math.PI*_data.rotation/360;
+  
+    for(let i = 0; i < _data.verticies; i++){
+        let x1 = _data.x + Math.round(Math.cos(rotation + angle*i)*_data.radius);
+        let y1 = _data.y + Math.round(Math.sin(rotation + angle*i)*_data.radius);
+        let x2 = _data.x + Math.round(Math.cos(rotation + angle*(i+1))*_data.radius);
+        let y2 = _data.y + Math.round(Math.sin(rotation + angle*(i+1))*_data.radius);
+        polygon.addWall(x1, y1, x2, y2);
+    }
 }
