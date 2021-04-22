@@ -27,18 +27,53 @@ class Player {
   
       //visuals
       this.app = app;
-      //outline
       this.graphic = new PIXI.Graphics();
-      this.graphic.beginFill();
-      this.graphic.lineStyle(1, 0xFFFFFF);
-      this.graphic.drawRect(-20,-15, 40, 30);
+      let outlineColor = getOutlineColor(data.color);
+      //gun
+      this.graphic.beginFill(0x545454);
+      this.graphic.drawRect(-8, -60, 16, 40);
       this.graphic.endFill();
+      //body
+      this.graphic.beginFill(data.color);
+      this.graphic.drawCircle(0, 0, 25);
+      this.graphic.lineStyle(4, outlineColor);  //(thickness, color)
+      this.graphic.drawCircle(0, 0, 24);   //(x,y,radius)
+      this.graphic.endFill();
+       //eyes
+      this.graphic.lineStyle(0, outlineColor);
+      this.graphic.beginFill(0xffffff);
+      this.graphic.drawCircle(-10, 4, 8);
+      this.graphic.drawCircle(10, 4, 8);
+      this.graphic.beginFill(0x000000);
+      this.graphic.drawCircle(-10, 4, 4);
+      this.graphic.drawCircle(10, 4, 4);
+      //hand 1
+      this.graphic.beginFill(data.color);
+      this.graphic.drawCircle(2, -20, 8);
+      this.graphic.lineStyle(2, outlineColor);  //(thickness, color)
+      this.graphic.drawCircle(2, -20, 7);   //(x,y,radius)
+      this.graphic.endFill();
+      //hand 2
+      this.graphic.beginFill(data.color);
+      this.graphic.drawCircle(8, -45, 8);
+      this.graphic.lineStyle(2, outlineColor);  //(thickness, color)
+      this.graphic.drawCircle(8, -45, 7);   //(x,y,radius)
+      this.graphic.endFill();  
+      //health bar holder
+      this.graphic.beginFill(0xFF0000);
+      this.graphic.drawRect(-20, 35, 40, 10);
+      this.graphic.endFill();
+      //this.graphic.scale.set(2);
       this.graphic.x = data.x;
       this.graphic.y = data.y;
       app.stage.addChild(this.graphic);
-      //sprite
-      //this.sprite = new PIXI.Sprite(TEXTURES.car);
-      //app.stage.addChild(this.sprite);
+      //health_bar
+      this.health_bar = new PIXI.Graphics();
+      this.health_bar.beginFill(0x00FF00);
+      this.health_bar.drawRect(-20, 35, 40, 10);
+      this.health_bar.endFill();
+      app.stage.addChild(this.health_bar);
+      //this.health_bar.width = 20;
       //identification
       this.id = data.id;
       this.nick = new PIXI.Text(data.nick, {fontFamily : 'Arial', fontSize: 20, fill : data.color, align : 'center'});
@@ -46,6 +81,7 @@ class Player {
       this.app.stage.addChild(this.nick);
       //
       Object.assign(this.graphic, {worldPos : {x : this.graphic.x, y : this.graphic.y}} );
+      Object.assign(this.health_bar, {worldPos : {x : this.health_bar.x, y : this.health_bar.y}} );
       Object.assign(this.nick, {worldPos : {x : this.nick.x, y : this.nick.y}} );
       //gun pos
       this.firePointAngle = -Math.PI/2;
@@ -63,15 +99,19 @@ class Player {
         this.respawn();
       }
       this.health = h;
+      this.health_bar.scale.x = this.health/3;
+      //this.health_bar.texture = TEXTURES.health_bar[3 - this.health];
     }
   
     respawn() {
       this.app.stage.addChild(this.graphic);
+      this.app.stage.addChild(this.health_bar);
       this.app.stage.addChild(this.nick);
     }
   
     destroy() {
       this.app.stage.removeChild(this.graphic);
+      this.app.stage.removeChild(this.health_bar);
       this.app.stage.removeChild(this.nick);
     }
   
@@ -84,6 +124,10 @@ class Player {
       this.graphic.worldPos.x = this.pos.x;
       this.graphic.worldPos.y = this.pos.y;
       this.graphic.rotation = this.rotation;
+  
+      this.health_bar.worldPos.x = this.pos.x;
+      this.health_bar.worldPos.y = this.pos.y;
+      this.health_bar.rotation = this.rotation;
   
       this.nick.worldPos.x = this.pos.x;
       this.nick.worldPos.y = this.pos.y - 60;
