@@ -1,34 +1,24 @@
-const Game = {
-
-    initialized: false,
-  
-    init: function(data) {
-      this.map = data.map;
-  
-      this.players = new Array(data.playerCount).fill(null);
-      this.clientPlayer = null;
-  
-      this.bullets = [];
-  
+class Game{
+    constructor(data) {
       let doc_w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
       let doc_h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-
       this.app = new PIXI.Application({
         width: doc_w,
         height: doc_h,
         backgroundColor: 0x000000,
         resolution: window.devicePixelRatio || 1,
       });
-  
       document.getElementById('gameDiv').appendChild(this.app.view);
+      this.inputManager = new InputManager();
   
-      this.initialized = true;
-  
+      this.map = data.map;
+      this.players = new Array(data.playerCount).fill(null);
+      this.clientPlayer = null;
+      this.bullets = [];
       //add players
       for(let i = 0; i < data.players.length; i++){
         this.createPlayer(data.players[i].id, data.players[i]);
       }
-
       this.camera = new Camera(doc_w, doc_h);
 
 
@@ -36,16 +26,13 @@ const Game = {
       //add circles
       for(let i = 0; i < data.map.balls.length; i++)
         this.solidColliders.push(new SolidCircleCollider(data.map.balls[i], this.app));
-      
       //add vertex shapes
       for(let i = 0; i < data.map.vertexShapes.length; i++)
-        this.solidColliders.push(createVertexShapeCollider(data.map.vertexShapes[i], this.app));
-      
+        this.solidColliders.push(createVertexShapeCollider(data.map.vertexShapes[i], this.app)); 
       //add regular polygons
       for(let i = 0; i < data.map.regularPolygons.length; i++)
         this.solidColliders.push(createRegularPolygon(data.map.regularPolygons[i], this.app));
-      
-    },
+    }
 
     resizeRequest(){
       return;
@@ -59,23 +46,14 @@ const Game = {
       this.app.view.height = doc_h;
 
       this.camera.resize(doc_w, doc_h);
-    },
+    }
 
-    terminate : function(){
-      this.map = null;
-  
-      this.players = null;
-  
-      this.bullets = null;
-
+    terminate(){
+      this.inputManager.terminate();
       this.app.view.remove();
-
-      this.app = null;
+    }
   
-      this.initialized = false;
-    },
-  
-    update: function(delta) {
+    update(delta) {
       //console.clear();
       //console.log(this.bullets.length);
       //update players
@@ -120,24 +98,24 @@ const Game = {
         }
       }
       
-    },
+    }
   
-    createPlayer: function(id, data) {
+    createPlayer(id, data) {
       if(this.players[id] != null) return;
       this.players[id] = new Player(data, this.app);
-    },
+    }
   
-    removePlayer: function(id) {
+    removePlayer(id) {
       this.players[id].destroy();
       this.players[id] = null;
-    },
+    }
 
     assignPlayerById(_id){
       this.clientPlayer = this.players[_id];
       this.camera.setTarget(this.clientPlayer);
-    },
+    }
   
-    updateServer: function(data) {
+    updateServer(data) {
       //update players server data
       for (let i = 0; i < data.players.length; i++) {
         this.players[i].updateServerPos(data.players[i], data.delta);
@@ -149,7 +127,7 @@ const Game = {
         }
       }
   
-    },
+    }
   
     playerShot(player){
       let x = player.firePointPos.x;
@@ -158,7 +136,12 @@ const Game = {
       let vy = 800 * Math.sin(player.serverTransform.rotation);
       let newBullet = new Bullet(x, y, vx, vy,player.color, this.app);
       this.bullets.push(newBullet);
-    },
+    }
+
+    getInputData(){
+      if(!this.clientPlayer.dead)
+      return this.inputManager.getInputData();
+    }
   
 }
 

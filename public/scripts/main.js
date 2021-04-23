@@ -7,6 +7,7 @@ const TEXTURES = {
 var socket;
 var t0, t1;
 var resizeTimer;
+var game;
 
 const DOM = {
   fpsDiv : document.getElementById('fpsDiv'),
@@ -121,8 +122,6 @@ function transitionToGame(){
   document.getElementById('lobbyDiv').setAttribute('visible', "false");
   document.getElementById('gameDiv').setAttribute('visible', "true");
   window.addEventListener('resize', windowResize);
-  window.addEventListener('keydown', windowKeyDown);
-  window.addEventListener('keyup', windowKeyUp);
   t0 = performance.now();
   t1 = performance.now();
   window.requestAnimationFrame(frame);
@@ -132,29 +131,20 @@ function transitionToLobby(){
     //alert('Bro, you were disconnected from the server!');
     //location.reload();
     //return;
-    Game.terminate();
+    game.terminate();
+    game = null;
     socket = null;
     document.getElementById('lobbyDiv').setAttribute('visible', "true");
     document.getElementById('gameDiv').setAttribute('visible', "false");
     window.removeEventListener('resize', windowResize);
-    window.removeEventListener('keydown', windowKeyDown);
-    window.removeEventListener('keyup', windowKeyUp);
 }
 
 function windowResize(){
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(()=>{
     console.log('resize');
-    Game.resizeRequest();
+    game.resizeRequest();
   }, 500);
-}
-
-function windowKeyDown(e){
-  InputManager.keyPressed(e.code);
-}
-
-function windowKeyUp(e){
-  InputManager.keyReleased(e.code);
 }
 
 function connectedToServer() {
@@ -163,7 +153,7 @@ function connectedToServer() {
    for(let i = 0; i < data.players.length; i++){
      addToLeaderBoard(data.players[i].id, data.players[i].nick, data.players[i].color);
    }
-   Game.init(data);
+   game = new Game(data);
   });
 
   socket.on('message', (msg) => {
@@ -172,17 +162,17 @@ function connectedToServer() {
 
   socket.on('assignPlayer', (id) => {
     //console.log('assigned', id);
-    Game.assignPlayerById(id);
+    game.assignPlayerById(id);
   });
 
   socket.on('createPlayer', (id, data) => {
     addToLeaderBoard(id, data.nick, data.color);
-    Game.createPlayer(id, data);
+    game.createPlayer(id, data);
   });
 
   socket.on('removePlayer', (id) => {
     removeFromLeaderBoard(id);
-    Game.removePlayer(id);
+    game.removePlayer(id);
   });
 
   socket.on('updateEntities', (data) => {
@@ -190,7 +180,7 @@ function connectedToServer() {
 
     if(decodedData.KD != null)  updateLeaderboard(decodedData.KD);
 
-    Game.updateServer(decodedData);
+    game.updateServer(decodedData);
 
     let ms = '' + Date.now();
     let myTime = ms.substring(ms.length-3, ms.length);
@@ -206,14 +196,14 @@ function frame() {
   t0 = performance.now();
   var delta = (t0 - t1) / 1000;
 
-  if (Game.initialized) {
-    let inputData = InputManager.getInputData();
+  if (game) {
+    let inputData = game.getInputData();
 
     if (inputData != null) {
       socket.emit('playerInput', inputData);
     }
 
-    Game.update(delta);
+    game.update(delta);
   }
 
   DOM.fpsDiv.innerHTML = 'FPS(c): ' + Math.round(1/delta);

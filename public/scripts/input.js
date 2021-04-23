@@ -1,18 +1,23 @@
-const InputManager = {
-    lastSentInput: {
+class InputManager{
+
+  constructor(){
+    this.lastSentInput = {
       x: 0,
       y: 0,
       action: false
-    },
-    currentInput: {
+    };
+    this.currentInput = {
       x: 0,
       y: 0,
       action: false
-    },
+    };
+    this.listenerKeyDown = (e) => {this.keyPressed(e)};
+    this.listenerKeyUp = (e) => {this.keyReleased(e)};
+    window.addEventListener('keydown', this.listenerKeyDown);
+    window.addEventListener('keyup', this.listenerKeyUp);
+  }
   
-    getInputData: function() {
-      if (Game.clientPlayer == null || Game.clientPlayer.dead) return null;
-  
+    getInputData(){
       let inputToSend = {};
       let inputEmpty = true;
   
@@ -33,14 +38,11 @@ const InputManager = {
         this.lastSentInput.action = this.currentInput.action;
         inputEmpty = false;
       }
-  
       return inputEmpty ? null : inputToSend;
+    }
   
-    },
-  
-  
-    keyPressed: function(key) {
-      switch (key) {
+    keyPressed(e){
+      switch (e.code) {
         
         case 'ArrowRight':
         case 'KeyD':
@@ -63,10 +65,10 @@ const InputManager = {
           break;
   
       }
-    },
+    }
   
-    keyReleased: function(key) {
-      switch (key) {
+    keyReleased(e){
+      switch (e.code) {
         case 'ArrowRight': case 'KeyD':
           this.currentInput.x = 0;
           break;
@@ -83,6 +85,11 @@ const InputManager = {
             this.currentInput.action = false;
           break;
       }
-    },
+    }
+
+    terminate(){
+      window.removeEventListener('keydown',  this.listenerKeyDown);
+      window.removeEventListener('keyup',  this.listenerKeyUp);
+    }
   
   }

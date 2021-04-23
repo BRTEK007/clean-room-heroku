@@ -40,6 +40,15 @@ class Player {
       this.graphic.endFill();
       this.graphic.x = data.x;
       this.graphic.y = data.y;
+      //eyes
+      this.graphic.lineStyle(0, outlineColor);
+      this.graphic.beginFill(0xffffff);
+      this.graphic.drawCircle(-4, -10, 8);
+      this.graphic.drawCircle(-4, 10, 8);
+      this.graphic.beginFill(0x000000);
+      this.graphic.drawCircle(-4, -10, 4);
+      this.graphic.drawCircle(-4, 10, 4);
+      //
       app.stage.addChild(this.graphic);
       //tail
       this.particles = [];
