@@ -12,10 +12,7 @@ function getOutlineColor(dec){
 
 class Player {
     constructor(data, app) {
-      this.pos = {
-        x: data.x,//data.x, y
-        y: data.y
-      };
+      this.pos = new Vector2D(data.x, data.y);
       this.rotation = 0;
       this.radius = 25;
       this.health = 3;
@@ -45,7 +42,7 @@ class Player {
       this.graphic.y = data.y;
       app.stage.addChild(this.graphic);
       //tail
-      this.tail = [];
+      this.particles = [];
       this.lastPlacedShade = new Vector2D(this.pos.x, this.pos.y);
       //identification
       this.id = data.id;
@@ -94,6 +91,27 @@ class Player {
   
       this.nick.worldPos.x = this.pos.x;
       this.nick.worldPos.y = this.pos.y - 60;
+      
+      /*if(Vector2D.distSquare(this.pos, this.lastPlacedShade) > Math.pow(12.5, 2)){
+        this.lastPlacedShade.x = this.pos.x;
+        this.lastPlacedShade.y = this.pos.y;
+        this.particles.push(
+          new Particle(this.pos.x, this.pos.y, 
+          new Vector2D(this.serverTransform.x - this.pos.x, this.serverTransform.y - this.pos.y).normal(), 
+          this.particles[this.particles.length-1], 
+          getOutlineColor(this.color),
+          this.app));
+      }*/
+
+      for(let i = 0; i < this.particles.length; i++){
+        if(this.particles[i].tintColor <= 0){
+          if(i != 0)
+            this.app.stage.removeChild(this.particles[i].graphic);
+          this.particles.splice(i, 1);
+          continue;
+        }
+        this.particles[i].update(delta);
+      }
     }
   
     lerp(start, end, time){return start * (1-time) + end * time;}
@@ -113,4 +131,43 @@ class Player {
       this.firePointPos.x = data.x + Math.cos(data.rotation) * this.firePointMag;
       this.firePointPos.y = data.y + Math.sin(data.rotation) * this.firePointMag;
     }
+}
+
+class Particle{
+  constructor(_x, _y, _n, _prev, _color,_app){
+    this.pos = {x : _x, y : _y};
+    if(_prev == null){
+      this.radius = 25;
+      this.rightPoint = new Vector2D(_n.x*this.radius, _n.y*this.radius);
+      this.leftPoint = new Vector2D(-_n.x*this.radius, -_n.y*this.radius);
+    }else{
+      this.tintColor = 16777215;
+      this.radius = 25;
+      this.rightPoint = new Vector2D(_n.x*this.radius, _n.y*this.radius);
+      this.leftPoint = new Vector2D(-_n.x*this.radius, -_n.y*this.radius);
+      if(
+        Vector2D.dot(this.rightPoint, _prev.rightPoint) < Vector2D.dot(this.rightPoint, _prev.leftPoint)
+      ){
+        let t = this.rightPoint;
+        this.rightPoint = this.leftPoint;
+        this.leftPoint = t;
+      }
+
+      this.graphic = new PIXI.Graphics();
+      this.graphic.lineStyle(4, _color);
+      this.graphic.moveTo(this.pos.x + this.rightPoint.x, this.pos.y + this.rightPoint.y);
+      this.graphic.lineTo(_prev.pos.x + _prev.rightPoint.x, _prev.pos.y + _prev.rightPoint.y);
+      this.graphic.moveTo(this.pos.x + this.leftPoint.x, this.pos.y + this.leftPoint.y);
+      this.graphic.lineTo(_prev.pos.x + _prev.leftPoint.x, _prev.pos.y + _prev.leftPoint.y);
+      _app.stage.addChild(this.graphic);
+      Object.assign(this.graphic, {worldPos : {x : 0, y : 0}} );
+    }
+  }
+
+  update(){
+    if(this.graphic){
+      this.tintColor -= 65793*4;
+      this.graphic.tint = this.tintColor;
+    }
+  }
 }

@@ -86,7 +86,6 @@ const Game = {
       }
   
       //update bullets
-      loop1:
       for (let i = 0; i < this.bullets.length; i++) {
         //remove dead bullets
         if (this.bullets[i].isDead) {
@@ -94,9 +93,11 @@ const Game = {
           this.bullets.splice(i, 1);
           continue;
         }
-  
         this.bullets[i].update(delta);
-  
+      }
+      //bullets collisions
+      loop1:
+      for (let i = 0; i < this.bullets.length; i++) {
         //bullets player collision
         for (let j = 0; j < this.players.length; j++) {
           if (this.players[j] == null || this.bullets[i].id == j || this.players[j].dead) continue;
