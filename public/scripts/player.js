@@ -26,30 +26,35 @@ class Player {
   
       //visuals
       this.app = app;
-      this.graphic = new PIXI.Graphics();
       this.color = data.color;
       let outlineColor = getOutlineColor(data.color);
       //gun
-      this.graphic.beginFill(0x545454);
-      this.graphic.drawRect(10, -8, 40, 16);
-      this.graphic.endFill();
+      this.gunGraphic = new PIXI.Graphics();
+      this.gunGraphic.beginFill(data.color);
+      this.gunGraphic.lineStyle(4, outlineColor); 
+      this.gunGraphic.drawRect(0, -12, 40, 24);
+      this.gunGraphic.endFill();
+      app.stage.addChild(this.gunGraphic);
+      this.gunGraphic.x = data.x;
+      this.gunGraphic.y = data.y;
       //body
+      this.graphic = new PIXI.Graphics();
       this.graphic.beginFill(data.color);
       this.graphic.lineStyle(4, outlineColor);  //(thickness, color)
       this.graphic.drawCircle(0, 0, 25);
       this.graphic.endFill();
-      this.graphic.x = data.x;
-      this.graphic.y = data.y;
       //eyes
-      this.graphic.lineStyle(0, outlineColor);
+      this.graphic.lineStyle(2, outlineColor);
       this.graphic.beginFill(0xffffff);
       this.graphic.drawCircle(-4, -10, 8);
       this.graphic.drawCircle(-4, 10, 8);
       this.graphic.beginFill(0x000000);
+      this.graphic.lineStyle(0, 0);
       this.graphic.drawCircle(-4, -10, 4);
       this.graphic.drawCircle(-4, 10, 4);
-      //
       app.stage.addChild(this.graphic);
+      this.graphic.x = data.x;
+      this.graphic.y = data.y;
       //tail
       this.particles = [];
       this.lastPlacedShade = new Vector2D(this.pos.x, this.pos.y);
@@ -61,6 +66,7 @@ class Player {
       //
       Object.assign(this.graphic, {worldPos : {x : this.graphic.x, y : this.graphic.y}} );
       Object.assign(this.nick, {worldPos : {x : this.nick.x, y : this.nick.y}} );
+      Object.assign(this.gunGraphic, {worldPos : {x : this.gunGraphic.x, y : this.gunGraphic.y}} );
       //gun pos
       this.firePointMag = 65;
       this.firePointPos = {x: 0, y: 0};
@@ -100,8 +106,15 @@ class Player {
   
       this.nick.worldPos.x = this.pos.x;
       this.nick.worldPos.y = this.pos.y - 60;
+
+      this.gunGraphic.worldPos.x = this.pos.x;
+      this.gunGraphic.worldPos.y = this.pos.y;
+      this.gunGraphic.rotation = this.rotation;
+      if(this.gunGraphic.scale.x < 1){
+        this.gunGraphic.scale.x += 0.01;
+      }
       
-      /*if(Vector2D.distSquare(this.pos, this.lastPlacedShade) > Math.pow(12.5, 2)){
+      if(Vector2D.distSquare(this.pos, this.lastPlacedShade) > Math.pow(12.5, 2)){
         this.lastPlacedShade.x = this.pos.x;
         this.lastPlacedShade.y = this.pos.y;
         this.particles.push(
@@ -110,7 +123,7 @@ class Player {
           this.particles[this.particles.length-1], 
           getOutlineColor(this.color),
           this.app));
-      }*/
+      }
 
       for(let i = 0; i < this.particles.length; i++){
         if(this.particles[i].tintColor <= 0){
@@ -140,18 +153,22 @@ class Player {
       this.firePointPos.x = data.x + Math.cos(data.rotation) * this.firePointMag;
       this.firePointPos.y = data.y + Math.sin(data.rotation) * this.firePointMag;
     }
+
+    shootAnim(){
+      this.gunGraphic.scale.x = 0.8;
+    }
 }
 
 class Particle{
   constructor(_x, _y, _n, _prev, _color,_app){
-    this.pos = {x : _x, y : _y};
+    this.pos = new Vector2D(_x, _y);
     if(_prev == null){
       this.radius = 25;
       this.rightPoint = new Vector2D(_n.x*this.radius, _n.y*this.radius);
       this.leftPoint = new Vector2D(-_n.x*this.radius, -_n.y*this.radius);
     }else{
-      this.tintColor = 16777215;
       this.radius = 25;
+      this.tintColor = 16777215;
       this.rightPoint = new Vector2D(_n.x*this.radius, _n.y*this.radius);
       this.leftPoint = new Vector2D(-_n.x*this.radius, -_n.y*this.radius);
       if(
@@ -163,20 +180,32 @@ class Particle{
       }
 
       this.graphic = new PIXI.Graphics();
-      this.graphic.lineStyle(4, _color);
+      this.graphic.lineStyle(1, getOutlineColor(_color));
+      //this.graphic.beginFill(_color);
+      //this.graphic.drawCircle(0, 0, 25);
+      //this.graphic.endFill();
+      //this.graphic.moveTo(this.pos.x, this.pos.y);
+      //this.graphic.lineTo(_prev.pos.x , _prev.pos.y );
       this.graphic.moveTo(this.pos.x + this.rightPoint.x, this.pos.y + this.rightPoint.y);
       this.graphic.lineTo(_prev.pos.x + _prev.rightPoint.x, _prev.pos.y + _prev.rightPoint.y);
       this.graphic.moveTo(this.pos.x + this.leftPoint.x, this.pos.y + this.leftPoint.y);
       this.graphic.lineTo(_prev.pos.x + _prev.leftPoint.x, _prev.pos.y + _prev.leftPoint.y);
+      //this.graphic.endFill();
+
       _app.stage.addChild(this.graphic);
+      //this.graphic.x = this.pos.x;
+      //this.graphic.y = this.pos.y;
+      //Object.assign(this.graphic, {worldPos : {x : this.pos.x, y : this.pos.y}} );
       Object.assign(this.graphic, {worldPos : {x : 0, y : 0}} );
     }
   }
 
   update(){
     if(this.graphic){
-      this.tintColor -= 65793*4;
       this.graphic.tint = this.tintColor;
+      this.tintColor -= 65793*4;
+      this.graphic.scale.x -= 0.05;
+      this.graphic.scale.y -= 0.05;
     }
   }
 }

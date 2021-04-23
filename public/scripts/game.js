@@ -135,6 +135,7 @@ class Game{
       let vx = 800 * Math.cos(player.serverTransform.rotation);
       let vy = 800 * Math.sin(player.serverTransform.rotation);
       let newBullet = new Bullet(x, y, vx, vy,player.color, this.app);
+      player.shootAnim();
       this.bullets.push(newBullet);
     }
 
