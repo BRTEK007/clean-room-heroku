@@ -6,19 +6,19 @@ class CollisionDetection{
     }
 
     static cirlce2solidWall(b1, w1){
-        let ballToClosest = CollisionDetection.closestPointCircle2Wall(b1, w1).subtr(b1.transform.pos);
+        let ballToClosest = CollisionDetection.closestPointCircle2Wall(b1, w1).subtr(b1.pos);
         return ballToClosest.mag() <= b1.radius ? true : false;
     }
       
     static closestPointCircle2Wall(b1, w1){
-        let ballToWallStart = w1.start.subtr(b1.transform.pos);
+        let ballToWallStart = w1.start.subtr(b1.pos);
         let wallUnit = w1.wallUnit();
 
         if(Vector2D.dot(wallUnit, ballToWallStart) > 0){
             return w1.start;
         }
       
-        let wallEndToBall = b1.transform.pos.subtr(w1.end);
+        let wallEndToBall = b1.pos.subtr(w1.end);
         if(Vector2D.dot(wallUnit, wallEndToBall) > 0){
             return w1.end;
         }
@@ -98,5 +98,22 @@ function createRegularPolygon(_data, _app){
         let x2 = _data.x + Math.round(Math.cos(rotation + angle*(i+1))*_data.radius);
         let y2 = _data.y + Math.round(Math.sin(rotation + angle*(i+1))*_data.radius);
         polygon.addWall(x1, y1, x2, y2);
+    }
+    return polygon;
+}
+
+function bulletSolidCollision(_b, _s){
+    if(_s instanceof SolidPolygonCollider){
+        for(let i = 0; i < _s.walls.length; i++){
+          if(CollisionDetection.cirlce2solidWall(_b, _s.walls[i])){
+            _b.isDead = true;
+            return;
+          }
+        }
+    }else if(_s instanceof SolidCircleCollider){
+        if(CollisionDetection.circle2circle(_b.pos.x, _b.pos.y, _b.radius, _s.pos.x, _s.pos.y, _s.radius)){
+            _b.isDead = true;
+            return;
+        }
     }
 }

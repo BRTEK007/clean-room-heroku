@@ -1,13 +1,7 @@
 class Bullet {
     constructor(px, py, vx, vy, _color ,app) {
-      this.pos = {
-        x: px,
-        y: py
-      };
-      this.vel = {
-        x: vx,
-        y: vy
-      };
+      this.pos = new Vector2D(px, py);
+      this.vel = new Vector2D(vx, vy);
       this.radius = 10;
       this.idDead = false;
   

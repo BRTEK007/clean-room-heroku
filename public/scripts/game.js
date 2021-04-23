@@ -45,7 +45,6 @@ const Game = {
       for(let i = 0; i < data.map.regularPolygons.length; i++)
         this.solidColliders.push(createRegularPolygon(data.map.regularPolygons[i], this.app));
       
-  
     },
 
     resizeRequest(){
@@ -96,28 +95,16 @@ const Game = {
         this.bullets[i].update(delta);
       }
       //bullets collisions
-      loop1:
       for (let i = 0; i < this.bullets.length; i++) {
         //bullets player collision
         for (let j = 0; j < this.players.length; j++) {
           if (this.players[j] == null || this.bullets[i].id == j || this.players[j].dead) continue;
-          if (this.doesBulletPlayerOverlap(this.bullets[i], this.players[j])) { this.bullets[i].isDead = true; continue;}
         }
   
         //bullets level collisions
-        /*for(let j = 0; j < this.solidColliders.length; j++){
-          let sCol = this.solidColliders[j];
-          if(sCol instanceof SolidPolygonCollider){
-            for(let i = 0; i < sCol.walls.length; i++){
-              if(CollisionDetection.cirlce2solidWall(sCol, sCol.walls[i])){
-                this.bullets[i].isDead = true;
-                continue loop1;
-              }
-                
-            }
-          }
-
-        }*/
+        for(let j = 0; j < this.solidColliders.length; j++){
+          bulletSolidCollision(this.bullets[i], this.solidColliders[j]);
+        }
   
       }
   
@@ -173,33 +160,6 @@ const Game = {
       this.bullets.push(newBullet);
     },
   
-    resolveBulletRectCollision(bullet, rect) {
-      if (bullet.pos.x + bullet.radius >= rect.x &&
-        bullet.pos.x - bullet.radius <= rect.x + rect.w &&
-        bullet.pos.y + bullet.radius >= rect.y &&
-        bullet.pos.y - bullet.radius <= rect.y + rect.h) {
-        bullet.isDead = true;
-      }
-    },
-
-    resolveBulletBallCollision(bullet, ball) {
-      if( Math.abs( Math.pow(bullet.pos.x - ball.x, 2) + Math.pow(bullet.pos.y - ball.y, 2) ) <= Math.pow(bullet.radius + ball.r, 2) ){
-        bullet.isDead = true;
-      }
-    },
-  
-    doesBulletPlayerOverlap: function(bullet, player) {
-      let x1 = bullet.pos.x;
-      let y1 = bullet.pos.y;
-  
-      let x2 = player.pos.x;
-      let y2 = player.pos.y;
-  
-      let r1 = player.radius;
-      let r2 = bullet.radius;
-  
-      return Math.abs((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) <= (r1 + r2) * (r1 + r2);
-    }
 }
 
 class Camera{
