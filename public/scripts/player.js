@@ -121,12 +121,12 @@ class Player {
           new Particle(this.pos.x, this.pos.y, 
           new Vector2D(this.serverTransform.x - this.pos.x, this.serverTransform.y - this.pos.y).normal(), 
           this.particles[this.particles.length-1], 
-          getOutlineColor(this.color),
+          this.color,
           this.app));
       }
 
       for(let i = 0; i < this.particles.length; i++){
-        if(this.particles[i].tintColor <= 0){
+        if(this.particles[i].radius <= 0){
           if(i != 0)
             this.app.stage.removeChild(this.particles[i].graphic);
           this.particles.splice(i, 1);
@@ -161,14 +161,16 @@ class Player {
 
 class Particle{
   constructor(_x, _y, _n, _prev, _color,_app){
+    this.n = _n;
     this.pos = new Vector2D(_x, _y);
+    this.color = _color;
+    this.prev = _prev;
     if(_prev == null){
       this.radius = 25;
-      this.rightPoint = new Vector2D(_n.x*this.radius, _n.y*this.radius);
-      this.leftPoint = new Vector2D(-_n.x*this.radius, -_n.y*this.radius);
+      this.rightPoint = new Vector2D(0,0);
+      this.leftPoint = new Vector2D(0,0);
     }else{
       this.radius = 25;
-      this.tintColor = 16777215;
       this.rightPoint = new Vector2D(_n.x*this.radius, _n.y*this.radius);
       this.leftPoint = new Vector2D(-_n.x*this.radius, -_n.y*this.radius);
       if(
@@ -180,32 +182,47 @@ class Particle{
       }
 
       this.graphic = new PIXI.Graphics();
-      this.graphic.lineStyle(1, getOutlineColor(_color));
-      //this.graphic.beginFill(_color);
-      //this.graphic.drawCircle(0, 0, 25);
-      //this.graphic.endFill();
-      //this.graphic.moveTo(this.pos.x, this.pos.y);
-      //this.graphic.lineTo(_prev.pos.x , _prev.pos.y );
+      this.graphic.beginFill(_color);
       this.graphic.moveTo(this.pos.x + this.rightPoint.x, this.pos.y + this.rightPoint.y);
       this.graphic.lineTo(_prev.pos.x + _prev.rightPoint.x, _prev.pos.y + _prev.rightPoint.y);
-      this.graphic.moveTo(this.pos.x + this.leftPoint.x, this.pos.y + this.leftPoint.y);
       this.graphic.lineTo(_prev.pos.x + _prev.leftPoint.x, _prev.pos.y + _prev.leftPoint.y);
-      //this.graphic.endFill();
-
+      this.graphic.lineTo(this.pos.x + this.leftPoint.x, this.pos.y + this.leftPoint.y);
+      this.graphic.closePath();
+      this.graphic.endFill();
       _app.stage.addChild(this.graphic);
-      //this.graphic.x = this.pos.x;
-      //this.graphic.y = this.pos.y;
-      //Object.assign(this.graphic, {worldPos : {x : this.pos.x, y : this.pos.y}} );
       Object.assign(this.graphic, {worldPos : {x : 0, y : 0}} );
+
+      /*_app.stage.addChild(this.graphic);
+      this.graphic.x = this.pos.x;
+      this.graphic.y = this.pos.y;
+      //Object.assign(this.graphic, {worldPos : {x : this.pos.x, y : this.pos.y}} );
+      Object.assign(this.graphic, {worldPos : {x : 0, y : 0}} );*/
     }
   }
 
   update(){
     if(this.graphic){
-      this.graphic.tint = this.tintColor;
-      this.tintColor -= 65793*4;
-      this.graphic.scale.x -= 0.05;
-      this.graphic.scale.y -= 0.05;
+      this.graphic.clear();
+      this.graphic.beginFill(this.color);
+      this.graphic.moveTo(this.pos.x + this.rightPoint.x, this.pos.y + this.rightPoint.y);
+      this.graphic.lineTo(this.prev.pos.x + this.prev.rightPoint.x, this.prev.pos.y + this.prev.rightPoint.y);
+      this.graphic.lineTo(this.prev.pos.x + this.prev.leftPoint.x, this.prev.pos.y + this.prev.leftPoint.y);
+      this.graphic.lineTo(this.pos.x + this.leftPoint.x, this.pos.y + this.leftPoint.y);
+      this.graphic.closePath();
+      this.graphic.endFill();
+      //this.tintColor -= 65793*4;
+      //this.graphic.scale.x -= 0.05;
+      //this.graphic.scale.y -= 0.05;
+      this.rightPoint = new Vector2D(this.n.x*this.radius, this.n.y*this.radius);
+      this.leftPoint = new Vector2D(-this.n.x*this.radius, -this.n.y*this.radius);
+      if(
+        Vector2D.dot(this.rightPoint, this.prev.rightPoint) < Vector2D.dot(this.rightPoint, this.prev.leftPoint)
+      ){
+        let t = this.rightPoint;
+        this.rightPoint = this.leftPoint;
+        this.leftPoint = t;
+      }
+      this.radius -= 1;
     }
   }
 }

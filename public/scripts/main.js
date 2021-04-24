@@ -5,9 +5,10 @@ const TEXTURES = {
 };
 
 var socket;
-var t0, t1;
 var resizeTimer;
 var game;
+
+var ticker = PIXI.Ticker.shared;
 
 const DOM = {
   fpsDiv : document.getElementById('fpsDiv'),
@@ -122,15 +123,27 @@ function transitionToGame(){
   document.getElementById('lobbyDiv').setAttribute('visible', "false");
   document.getElementById('gameDiv').setAttribute('visible', "true");
   window.addEventListener('resize', windowResize);
-  t0 = performance.now();
-  t1 = performance.now();
-  window.requestAnimationFrame(frame);
+  //ticker.start();
+  ticker.add(function (time) {
+    //console.log(ticker.deltaMS);
+    if (game) {
+      let inputData = game.getInputData();
+  
+      if (inputData != null) {
+        socket.emit('playerInput', inputData);
+      }
+  
+      game.update(ticker.deltaMS/1000);
+    }
+    DOM.fpsDiv.innerHTML = 'FPS(c): ' + Math.round(1000/ticker.deltaMS);
+  });
 }
 
 function transitionToLobby(){
     //alert('Bro, you were disconnected from the server!');
     //location.reload();
     //return;
+    ticker.stop();
     game.terminate();
     game = null;
     socket = null;
@@ -189,24 +202,4 @@ function connectedToServer() {
 
     DOM.fpsDiv2.innerHTML = 'FPS(s): ' + Math.round(1/decodedData.delta);
   });
-}
-
-function frame() {
-  window.requestAnimationFrame(frame);
-  t0 = performance.now();
-  var delta = (t0 - t1) / 1000;
-
-  if (game) {
-    let inputData = game.getInputData();
-
-    if (inputData != null) {
-      socket.emit('playerInput', inputData);
-    }
-
-    game.update(delta);
-  }
-
-  DOM.fpsDiv.innerHTML = 'FPS(c): ' + Math.round(1/delta);
-
-  t1 = performance.now();
 }
