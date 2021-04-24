@@ -12,12 +12,12 @@ class Game{
       this.inputManager = new InputManager();
   
       this.map = data.map;
-      this.players = new Array(data.playerCount).fill(null);
+      this.players = new Array();
       this.clientPlayer = null;
       this.bullets = [];
       //add players
       for(let i = 0; i < data.players.length; i++){
-        this.createPlayer(data.players[i].id, data.players[i]);
+        this.createPlayer(data.players[i]);
       }
       this.camera = new Camera(doc_w, doc_h);
 
@@ -58,7 +58,7 @@ class Game{
       //console.log(this.bullets.length);
       //update players
       for (let i = 0; i < this.players.length; i++) {
-        if(this.players[i] != null && !this.players[i].isDead)
+        if(!this.players[i].isDead)
         this.players[i].updateTransform(delta);
       }
   
@@ -76,7 +76,7 @@ class Game{
       for (let i = 0; i < this.bullets.length; i++) {
         //bullets player collision
         for (let j = 0; j < this.players.length; j++) {
-          if (this.players[j] == null || this.bullets[i].id == j || this.players[j].dead) continue;
+          if (this.bullets[i].id == j || this.players[j].dead) continue;
         }
   
         //bullets level collisions
@@ -100,14 +100,14 @@ class Game{
       
     }
   
-    createPlayer(id, data) {
-      if(this.players[id] != null) return;
-      this.players[id] = new Player(data, this.app);
+    createPlayer(_data) {
+      if(_data.id < this.players.length) return;
+      this.players.push(new Player(_data, this.app));
     }
   
     removePlayer(id) {
       this.players[id].destroy();
-      this.players[id] = null;
+      this.players.splice(id, 1);
     }
 
     assignPlayerById(_id){
@@ -132,9 +132,9 @@ class Game{
     playerShot(player){
       let x = player.firePointPos.x;
       let y = player.firePointPos.y;
-      let vx = 800 * Math.cos(player.serverTransform.rotation);
-      let vy = 800 * Math.sin(player.serverTransform.rotation);
-      let newBullet = new Bullet(x, y, vx, vy,player.color, this.app);
+      let vx = 600 * Math.cos(player.serverTransform.rotation);
+      let vy = 600 * Math.sin(player.serverTransform.rotation);
+      let newBullet = new Bullet(x, y, vx, vy, player.color, this.app);
       player.shootAnim();
       this.bullets.push(newBullet);
     }

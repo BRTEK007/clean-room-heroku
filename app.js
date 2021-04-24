@@ -12,7 +12,7 @@ os.cpuUsage(function(v){
 	console.log( 'CPU Usage (%): ' + v );
 });
 
-const Game = require('./lib/game.js');
+const Game = require('./lib/Game.js');
 const formatModule = require('./lib/format.js');
 
 const tickLengthMs = 1000 / 60;
@@ -25,7 +25,7 @@ class Room{
   constructor(_id, _name, _maxPlayerCount, _token, _mapObj){
     this.id = _id;
     this.name = _name;
-    this.game = new Game(_mapObj, _maxPlayerCount);
+    this.game = new Game(_mapObj);
     this.maxPlayerCount = _maxPlayerCount;
     this.playerCount = 0;
     this.token = _token;
@@ -70,7 +70,8 @@ class Room{
 
     socket.emit('initGame', this.game.getInitData());
 
-    io.to(this.name).emit('createPlayer', newPlayer.id,{
+    io.to(this.name).emit('createPlayer', {
+       id : newPlayer.id,
        x : newPlayer.transform.pos.x, 
        y : newPlayer.transform.pos.y, 
        color: playerData.color, 
@@ -99,8 +100,7 @@ class RoomsManager{
     let mapObj = JSON.parse(rawdata);
 
     this.rooms = new Array();
-    this.rooms.push(new Room(1, 'game1', 10, '0000', mapObj));
-    //this.rooms.push(new Room(2, 'game2', new gameModule.Game(mapObj), 4, '0000'));
+    this.rooms.push(new Room(1, 'game1', 5, '0000', mapObj));
   }
 
   update(delta){

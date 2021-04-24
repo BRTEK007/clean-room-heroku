@@ -15,7 +15,7 @@ class Player {
       this.pos = new Vector2D(data.x, data.y);
       this.rotation = 0;
       this.radius = 25;
-      this.health = 3;
+      this.health = 1;
       this.dead = false;
       this.serverTransform = {
         x: data.x,
@@ -77,7 +77,7 @@ class Player {
         this.dead = true;
         this.destroy();
         return;
-      } else if (h >= 3) {
+      } else if (h >= 1) {
         this.dead = false;
         this.respawn();
       }
@@ -85,6 +85,7 @@ class Player {
     }
   
     respawn() {
+      this.app.stage.addChild(this.gunGraphic);
       this.app.stage.addChild(this.graphic);
       this.app.stage.addChild(this.nick);
     }
@@ -92,6 +93,7 @@ class Player {
     destroy() {
       this.app.stage.removeChild(this.graphic);
       this.app.stage.removeChild(this.nick);
+      this.app.stage.removeChild(this.gunGraphic);
     }
   
     updateTransform(delta) {

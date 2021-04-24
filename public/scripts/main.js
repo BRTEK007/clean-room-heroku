@@ -163,9 +163,9 @@ function windowResize(){
 function connectedToServer() {
 
   socket.on('initGame', (data) => {
-   for(let i = 0; i < data.players.length; i++){
+   /*for(let i = 0; i < data.players.length; i++){
      addToLeaderBoard(data.players[i].id, data.players[i].nick, data.players[i].color);
-   }
+   }*/
    game = new Game(data);
   });
 
@@ -178,13 +178,13 @@ function connectedToServer() {
     game.assignPlayerById(id);
   });
 
-  socket.on('createPlayer', (id, data) => {
-    addToLeaderBoard(id, data.nick, data.color);
-    game.createPlayer(id, data);
+  socket.on('createPlayer', (data) => {
+    //addToLeaderBoard(data.nick, data.color);
+    game.createPlayer(data);
   });
 
   socket.on('removePlayer', (id) => {
-    removeFromLeaderBoard(id);
+    //removeFromLeaderBoard(id);
     game.removePlayer(id);
   });
 
