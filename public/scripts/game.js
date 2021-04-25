@@ -15,12 +15,12 @@ class Game{
       this.players = new Array();
       this.clientPlayer = null;
       this.bullets = [];
+      this.particleSystems = [];
       //add players
       for(let i = 0; i < data.players.length; i++){
         this.createPlayer(data.players[i]);
       }
       this.camera = new Camera(doc_w, doc_h);
-
 
       this.solidColliders = [];
       //add circles
@@ -68,7 +68,7 @@ class Game{
         if (this.bullets[i].isDead) {
           this.bullets[i].destroy();
           this.bullets.splice(i, 1);
-          i--;
+          //i--;
           continue;
         }
         this.bullets[i].update(delta);
@@ -77,7 +77,9 @@ class Game{
       for (let i = 0; i < this.bullets.length; i++) {
         //bullets player collision
         for (let j = 0; j < this.players.length; j++) {
-          if (this.bullets[i].id == j || this.players[j].dead) continue;
+          if(this.players[j] != this.bullets[i].player && !this.players[j].isDead){
+            bulletPlayerCollision(this.bullets[i], this.players[j]);
+          }
         }
   
         //bullets level collisions
@@ -85,6 +87,17 @@ class Game{
           bulletSolidCollision(this.bullets[i], this.solidColliders[j]);
         }
   
+      }
+
+      //partical Systems
+      for (let i = 0; i < this.particleSystems.length; i++) {
+        //remove dead bullets
+        if (this.particleSystems[i].isFinished) {
+          this.particleSystems.splice(i, 1);
+          //i--;
+          continue;
+        }
+        this.particleSystems[i].update(delta);
       }
   
       //render
@@ -103,7 +116,7 @@ class Game{
   
     createPlayer(_data) {
       if(_data.id < this.players.length) return;
-      this.players.push(new Player(_data, this.app));
+      this.players.push(new Player(_data, this));
     }
   
     removePlayer(id) {
@@ -124,6 +137,8 @@ class Game{
           this.playerShot(this.players[i]);
         }
         if (data.players[i].health != null) {
+          if(data.players[i].health == 0)
+            this.playerDied(this.players[i])
           this.players[i].updateHealth(data.players[i].health);
         }
       }
@@ -135,13 +150,18 @@ class Game{
       let y = player.firePointPos.y;
       let vx = 800 * Math.cos(player.serverTransform.rotation);
       let vy = 800 * Math.sin(player.serverTransform.rotation);
-      let newBullet = new Bullet(x, y, vx, vy, player.color, this.app);
+      let newBullet = new Bullet(player, x, y, vx, vy, this.app);
       player.shootAnim();
       this.bullets.push(newBullet);
     }
 
+    playerDied(player){
+      if(player.isDead) return;
+      this.particleSystems.push(new ParticleSystem(player.pos, this.app.stage));
+    }
+
     getInputData(){
-      if(!this.clientPlayer.dead)
+      if(!this.clientPlayer.isDead)
       return this.inputManager.getInputData();
     }
   
@@ -149,13 +169,15 @@ class Game{
 
 class Camera{
   constructor(_width, _height){
-    this.pos = {x : 300, y : 300};
-    this.size = {x : _width, y : _height};
+    this.pos = new Vector2D(0,0);
+    this.size = new Vector2D(_width, _height);
     this.target = null;
     this.speed = Infinity;
   }
   setTarget(_t){
     this.target = _t;
+    this.pos.x = this.target.pos.x;
+    this.pos.y = this.target.pos.y;
   }
   worldToScreenPosition(_pos){
     let cornerPos = {x : this.pos.x-this.size.x/2, y : this.pos.y-this.size.y/2};
@@ -167,8 +189,36 @@ class Camera{
   }
   update(_delta){
     if(this.target == null) return;
-    this.pos.x = this.lerp(this.pos.x, this.target.pos.x, _delta*this.speed);
-    this.pos.y = this.lerp(this.pos.y, this.target.pos.y, _delta*this.speed);
+    //this.pos = Vector2D.lerp(this.pos, this.target.pos, 1-Math.pow(0.1, _delta));
+    this.pos = Vector2D.lerp(this.pos, this.target.pos, 1);
+    //this.pos.x += (this.target.pos.x > this.pos.x) ? 1 : -1;
+    //this.pos.x += (this.target.pos.x - this.pos.x)/Math.abs(this.target.pos.x - this.pos.x);
+    //this.pos.y += (this.target.pos.y - this.pos.y)/Math.abs(this.target.pos.y - this.pos.y);
   }
-  lerp(start, end, time){time = Math.min(time, 1); return start * (1-time) + end * time;}
+}
+
+class ParticleSystem{
+  constructor(_pos, _container){
+    this.container = _container;
+    this.pos = new Vector2D(_pos.x, _pos.y);
+    this.isFinished = false;
+
+
+    this.graphic = new PIXI.Graphics();
+    this.graphic.lineStyle(1, 0xFFFFFF);
+    this.graphic.drawCircle(0, 0, 10);
+    this.container.addChild(this.graphic);
+    Object.assign(this.graphic, {worldPos : {x : this.pos.x, y : this.pos.y}} );
+  }
+  update(_delta){
+    this.graphic.scale.x += 0.1;
+    this.graphic.scale.y += 0.1;
+    if(this.graphic.scale.x >= 5){
+      this.isFinished = true;
+      this.destroy();
+    }
+  }
+  destroy(){
+    this.container.removeChild(this.graphic);
+  }
 }

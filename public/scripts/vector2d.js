@@ -31,6 +31,10 @@ class Vector2D{
             return new Vector2D(this.x/this.mag(), this.y/this.mag());
         }
     }
+
+    static lerp(v1, v2, t){
+        return new Vector2D(v1.x + (v2.x-v1.x)*t, v1.y +  (v2.y-v1.y)*t);
+    }
     
     static dot(v1, v2){
         return v1.x*v2.x + v1.y*v2.y;

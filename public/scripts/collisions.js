@@ -117,3 +117,10 @@ function bulletSolidCollision(_b, _s){
         }
     }
 }
+
+function bulletPlayerCollision(_b, _p){
+    if(CollisionDetection.circle2circle(_b.pos.x, _b.pos.y, _b.radius, _p.pos.x, _p.pos.y, _p.radius)){
+        _b.isDead = true;
+        return;
+    }
+}

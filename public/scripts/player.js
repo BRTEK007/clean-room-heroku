@@ -11,21 +11,20 @@ function getOutlineColor(dec){
 
 
 class Player {
-    constructor(data, app) {
+    constructor(data, _game) {
       this.pos = new Vector2D(data.x, data.y);
       this.rotation = 0;
       this.radius = 25;
       this.health = 1;
-      this.dead = false;
+      this.isDead = false;
       this.serverTransform = {
-        x: data.x,
-        y: data.y,
+        pos : new Vector2D(data.x, data.y),
         rotation: 0,
         delta: Infinity
       };
-  
+      this.game = _game;
       //visuals
-      this.app = app;
+      this.app = this.game.app;
       this.color = data.color;
       let outlineColor = getOutlineColor(data.color);
       //gun
@@ -34,7 +33,7 @@ class Player {
       this.gunGraphic.lineStyle(4, outlineColor); 
       this.gunGraphic.drawRect(0, -12, 40, 24);
       this.gunGraphic.endFill();
-      app.stage.addChild(this.gunGraphic);
+      this.app.stage.addChild(this.gunGraphic);
       this.gunGraphic.x = data.x;
       this.gunGraphic.y = data.y;
       //body
@@ -52,7 +51,7 @@ class Player {
       this.graphic.lineStyle(0, 0);
       this.graphic.drawCircle(-4, -10, 4);
       this.graphic.drawCircle(-4, 10, 4);
-      app.stage.addChild(this.graphic);
+      this.app.stage.addChild(this.graphic);
       this.graphic.x = data.x;
       this.graphic.y = data.y;
       //tail
@@ -73,23 +72,29 @@ class Player {
     }
   
     updateHealth(h) {
-      if (h <= 0) {
-        this.dead = true;
-        this.destroy();
+      if (!this.isDead && h <= 0) {
+        this.isDead = true;
+        this.changeVisibility(false);
         return;
-      } else if (h >= 1) {
-        this.dead = false;
-        this.respawn();
+      } else if (this.isDead && h >= 1) {
+        this.isDead = false;
+        this.changeVisibility(true);
       }
       this.health = h;
     }
   
-    respawn() {
+    showGraphic() {
       this.app.stage.addChild(this.gunGraphic);
       this.app.stage.addChild(this.graphic);
       this.app.stage.addChild(this.nick);
     }
   
+    changeVisibility(_v) {
+      this.graphic.visible = _v;
+      this.gunGraphic.visible = _v;
+      this.nick.visible = _v;
+    }
+
     destroy() {
       this.app.stage.removeChild(this.graphic);
       this.app.stage.removeChild(this.nick);
@@ -97,8 +102,7 @@ class Player {
     }
   
     updateTransform(delta) {
-      this.pos.x = this.lerp(this.pos.x, this.serverTransform.x, delta/this.serverTransform.delta);
-      this.pos.y = this.lerp(this.pos.y, this.serverTransform.y, delta/this.serverTransform.delta);
+      this.pos = Vector2D.lerp(this.pos, this.serverTransform.pos, delta/this.serverTransform.delta);
       this.rotation = this.circularLerp(this.rotation, this.serverTransform.rotation, delta/this.serverTransform.delta);
   
       //visuals
@@ -139,8 +143,6 @@ class Player {
 
     }
   
-    lerp(start, end, time){return start * (1-time) + end * time;}
-  
     circularLerp(start, end, time){
       if(Math.abs(start - end) > Math.abs(start - (end - Math.PI*2) )) end = end - Math.PI*2;
       else if(Math.abs(start - end) > Math.abs(start - (end + Math.PI*2) )) end = end + Math.PI*2;
@@ -148,8 +150,8 @@ class Player {
     }
   
     updateServerPos(data, delta){
-      this.serverTransform.x = data.x;
-      this.serverTransform.y = data.y;
+      this.serverTransform.pos.x = data.x;
+      this.serverTransform.pos.y = data.y;
       this.serverTransform.rotation = data.rotation;
       this.serverTransform.delta = delta;
       //fire poiont
