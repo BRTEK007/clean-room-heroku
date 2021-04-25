@@ -68,6 +68,7 @@ class Game{
         if (this.bullets[i].isDead) {
           this.bullets[i].destroy();
           this.bullets.splice(i, 1);
+          i--;
           continue;
         }
         this.bullets[i].update(delta);
@@ -132,8 +133,8 @@ class Game{
     playerShot(player){
       let x = player.firePointPos.x;
       let y = player.firePointPos.y;
-      let vx = 600 * Math.cos(player.serverTransform.rotation);
-      let vy = 600 * Math.sin(player.serverTransform.rotation);
+      let vx = 800 * Math.cos(player.serverTransform.rotation);
+      let vy = 800 * Math.sin(player.serverTransform.rotation);
       let newBullet = new Bullet(x, y, vx, vy, player.color, this.app);
       player.shootAnim();
       this.bullets.push(newBullet);

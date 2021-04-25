@@ -116,7 +116,7 @@ class Player {
         this.gunGraphic.scale.x += 0.01;
       }
       
-      if(Vector2D.distSquare(this.pos, this.lastPlacedShade) > Math.pow(12.5, 2)){
+      /*if(Vector2D.distSquare(this.pos, this.lastPlacedShade) > Math.pow(12.5, 2)){
         this.lastPlacedShade.x = this.pos.x;
         this.lastPlacedShade.y = this.pos.y;
         this.particles.push(
@@ -125,9 +125,9 @@ class Player {
           this.particles[this.particles.length-1], 
           this.color,
           this.app));
-      }
+      }*/
 
-      for(let i = 0; i < this.particles.length; i++){
+      /*for(let i = 0; i < this.particles.length; i++){
         if(this.particles[i].radius <= 0){
           if(i != 0)
             this.app.stage.removeChild(this.particles[i].graphic);
@@ -135,7 +135,8 @@ class Player {
           continue;
         }
         this.particles[i].update(delta);
-      }
+      }*/
+
     }
   
     lerp(start, end, time){return start * (1-time) + end * time;}

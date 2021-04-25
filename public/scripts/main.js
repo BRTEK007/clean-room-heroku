@@ -9,6 +9,19 @@ var resizeTimer;
 var game;
 
 var ticker = PIXI.Ticker.shared;
+ticker.add(function (time) {
+  if (game) {
+    let inputData = game.getInputData();
+
+    if (inputData != null) {
+      socket.emit('playerInput', inputData);
+    }
+
+    game.update(ticker.deltaMS/1000);
+  }
+  DOM.fpsDiv.innerHTML = 'FPS(c): ' + Math.round(1000/ticker.deltaMS);
+});
+ticker.stop();
 
 const DOM = {
   fpsDiv : document.getElementById('fpsDiv'),
@@ -123,20 +136,7 @@ function transitionToGame(){
   document.getElementById('lobbyDiv').setAttribute('visible', "false");
   document.getElementById('gameDiv').setAttribute('visible', "true");
   window.addEventListener('resize', windowResize);
-  //ticker.start();
-  ticker.add(function (time) {
-    //console.log(ticker.deltaMS);
-    if (game) {
-      let inputData = game.getInputData();
-  
-      if (inputData != null) {
-        socket.emit('playerInput', inputData);
-      }
-  
-      game.update(ticker.deltaMS/1000);
-    }
-    DOM.fpsDiv.innerHTML = 'FPS(c): ' + Math.round(1000/ticker.deltaMS);
-  });
+  ticker.start();
 }
 
 function transitionToLobby(){
