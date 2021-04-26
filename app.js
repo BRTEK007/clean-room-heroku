@@ -6,11 +6,11 @@ const app = express();
 const server = app.listen(PORT);
 const socket = require('socket.io');
 const io = socket(server);
-const os = require('os-utils');
+//const os = require('os-utils');
 
-os.cpuUsage(function(v){
+/*os.cpuUsage(function(v){
 	console.log( 'CPU Usage (%): ' + v );
-});
+});*/
 
 const Game = require('./lib/Game.js');
 const formatModule = require('./lib/format.js');
