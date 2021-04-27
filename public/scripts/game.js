@@ -157,7 +157,7 @@ class Game{
 
     playerDied(player){
       if(player.isDead) return;
-      this.particleSystems.push(new ParticleSystem(player.pos, this.app.stage));
+      this.particleSystems.push(new ParticleSystem(player.pos, player.color, this.app.stage));
     }
 
     getInputData(){
@@ -198,27 +198,36 @@ class Camera{
 }
 
 class ParticleSystem{
-  constructor(_pos, _container){
+  constructor(_pos, _color, _container){
     this.container = _container;
     this.pos = new Vector2D(_pos.x, _pos.y);
     this.isFinished = false;
 
+    this.lifeTime = 0;
+    this.desiredLifeTime = 0.25;
+
+    this.startScale = 0;
+    this.endScale = 10;
 
     this.graphic = new PIXI.Graphics();
-    this.graphic.lineStyle(1, 0xFFFFFF);
+    this.graphic.lineStyle(1, _color);
     this.graphic.drawCircle(0, 0, 10);
     this.container.addChild(this.graphic);
     Object.assign(this.graphic, {worldPos : {x : this.pos.x, y : this.pos.y}} );
   }
   update(_delta){
-    this.graphic.scale.x += 0.1;
-    this.graphic.scale.y += 0.1;
-    if(this.graphic.scale.x >= 5){
+    this.lifeTime += _delta;
+    if(this.lifeTime >= this.desiredLifeTime){
       this.isFinished = true;
       this.destroy();
     }
+    let scale = lerp(this.startScale, this.endScale, this.lifeTime/this.desiredLifeTime);
+    this.graphic.scale.x = scale;
+    this.graphic.scale.y = scale;
   }
   destroy(){
     this.container.removeChild(this.graphic);
   }
 }
+
+function lerp(s, e, t){return s + (e-s)*t}

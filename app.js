@@ -49,6 +49,7 @@ class Room{
   }
 
   joinRequest(socket){
+    //console.log(socket.handshake.address);
     if(this.playerCount >= this.maxPlayerCount){
       socket.disconnect();
       return;
