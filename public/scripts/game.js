@@ -153,11 +153,12 @@ class Game{
       let newBullet = new Bullet(player, x, y, vx, vy, this.app);
       player.shootAnim();
       this.bullets.push(newBullet);
+      //this.particleSystems.push(new PlayerExplosion(player.pos, player.color, this.app.stage));
     }
 
     playerDied(player){
       if(player.isDead) return;
-      this.particleSystems.push(new ParticleSystem(player.pos, player.color, this.app.stage));
+      this.particleSystems.push(new PlayerExplosion(player.pos, player.color, this.app.stage));
     }
 
     getInputData(){
@@ -197,36 +198,82 @@ class Camera{
   }
 }
 
-class ParticleSystem{
+class PlayerExplosion{
   constructor(_pos, _color, _container){
     this.container = _container;
     this.pos = new Vector2D(_pos.x, _pos.y);
     this.isFinished = false;
 
     this.lifeTime = 0;
-    this.desiredLifeTime = 0.25;
-
-    this.startScale = 0;
-    this.endScale = 10;
+    this.desiredLifeTime = 0.33;
+    this.innerRadius = 0;
+    this.radius = 50;
 
     this.graphic = new PIXI.Graphics();
-    this.graphic.lineStyle(1, _color);
-    this.graphic.drawCircle(0, 0, 10);
+    this.graphic.lineStyle(2, 0xFFFF00);
+    this.graphic.beginFill(0xFFFFFF);
+    this.graphic.drawCircle(0, 0, this.radius);
+    this.graphic.endFill();
+
     this.container.addChild(this.graphic);
     Object.assign(this.graphic, {worldPos : {x : this.pos.x, y : this.pos.y}} );
+
+    this.trails = new Array(6);
+    for(let i = 0; i < this.trails.length; i++){
+      let a = Math.random() * 2 * Math.PI;
+      this.trails[i] = new Spark(_pos.x, _pos.y, Math.cos(a), Math.sin(a), this.container);
+    }
   }
   update(_delta){
     this.lifeTime += _delta;
     if(this.lifeTime >= this.desiredLifeTime){
       this.isFinished = true;
       this.destroy();
+      return;
     }
-    let scale = lerp(this.startScale, this.endScale, this.lifeTime/this.desiredLifeTime);
-    this.graphic.scale.x = scale;
-    this.graphic.scale.y = scale;
+    this.innerRadius = lerp(0, this.radius, Math.min(0.25 + this.lifeTime/this.desiredLifeTime, 1));
+    this.graphic.clear();
+    this.graphic.lineStyle(4, 0xFFFF00);
+    this.graphic.beginFill(0xFFFFFF);
+    this.graphic.drawCircle(0, 0, this.radius);
+    this.graphic.endFill();
+    this.graphic.lineStyle(4, 0xFF0000);
+    this.graphic.beginFill(0x000000);
+    this.graphic.drawCircle(0, 0, this.innerRadius);
+    this.graphic.endFill();
+
+    for(let i = 0; i < this.trails.length; i++){
+      this.trails[i].update(_delta);
+    }
   }
   destroy(){
+    for(let i = 0; i < this.trails.length; i++){
+      this.trails[i].destroy(this.container);
+    }
     this.container.removeChild(this.graphic);
+  }
+}
+
+class Spark{
+  constructor(_px, _py, _vx, _vy, _container){
+    this.vel = new Vector2D(_vx, _vy);
+
+    this.graphic = new PIXI.Graphics();
+    this.graphic.lineStyle(2, 0xFFFF00);
+    this.graphic.beginFill(0xFF0000);
+    this.graphic.drawCircle(0, 0, 10);
+    this.graphic.endFill();
+    _container.addChild(this.graphic);
+    Object.assign(this.graphic, {worldPos : {x : _px, y : _py}} );
+  }
+  update(_delta){
+    this.graphic.worldPos.x += this.vel.x*_delta * 300;
+    this.graphic.worldPos.y += this.vel.y*_delta * 300;
+    this.graphic.scale.x *= 0.95;
+    this.graphic.scale.y *= 0.95;
+  }
+  destroy(_container){
+    _container.removeChild(this.graphic);
   }
 }
 

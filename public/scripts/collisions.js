@@ -51,6 +51,7 @@ class SolidPolygonCollider extends SolidCollider{
       this.walls = [];
       this.graphic = new PIXI.Graphics();
       this.graphic.lineStyle(2, 0xFFFFFF);
+      //this.graphic.beginFill(0xFFFFFF);
       Object.assign(this.graphic, {worldPos : {x : 0, y : 0}} );
       _app.stage.addChild(this.graphic);
     }
@@ -58,6 +59,10 @@ class SolidPolygonCollider extends SolidCollider{
       this.graphic.moveTo(x1, y1);
       this.graphic.lineTo(x2, y2);
       this.walls.push(new SolidWallCollider(x1, y1, x2, y2));
+    }
+    close(){
+        //this.graphic.close();
+        //this.graphic.endFill();
     }
 }
 
@@ -71,7 +76,9 @@ class SolidCircleCollider extends SolidCollider{
       this.graphic.x = _d.x;
       this.graphic.y = _d.y;
       this.graphic.lineStyle(2, 0xFFFFFF);
+      //this.graphic.beginFill(0xFFFFFF);
       this.graphic.drawCircle(0,0, _d.r);
+      //this.graphic.endFill();
       Object.assign(this.graphic, {worldPos : {x : _d.x, y : _d.y}} );
       _app.stage.addChild(this.graphic);
     }
@@ -99,6 +106,7 @@ function createRegularPolygon(_data, _app){
         let y2 = _data.y + Math.round(Math.sin(rotation + angle*(i+1))*_data.radius);
         polygon.addWall(x1, y1, x2, y2);
     }
+
     return polygon;
 }
 
