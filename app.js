@@ -41,7 +41,6 @@ class Room{
     emitDataBase.time = ms.substring(ms.length-3, ms.length);
 
     const emitData = formatModule.encode(emitDataBase);
-    Object.assign(emitData, {worldPos : new Array(100).fill(Math.random())} );
     io.to(this.name).emit('updateEntities', emitData);
   }
 
